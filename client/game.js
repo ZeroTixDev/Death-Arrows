@@ -1,5 +1,4 @@
 const ws = new WebSocket("wss://arrows.zerotixdev.repl.co");
-//POOP
 ws.binaryType = "arraybuffer";
 let players = Object.create(null);
 let arrows = Object.create(null);
