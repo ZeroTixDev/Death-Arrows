@@ -22,9 +22,10 @@ module.exports = class Arrow {
   }
   static pack({ arrows, removePack, platforms, delta }) {
     let pack = [];
+		const updates = 10;
     for (let i of Object.keys(arrows)) {
-      for (let d = 0; d < 5; d++) {
-        arrows[i].update(platforms, delta / 5);
+      for (let d = 0; d < updates; d++) {
+        arrows[i].update(platforms, delta / updates);
       }
       if (arrows[i].dead) {
         removePack.arrow.push({ id: arrows[i].id, type: "wall" });

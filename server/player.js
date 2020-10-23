@@ -141,9 +141,10 @@ module.exports = class Player {
   }
   static pack({ players, arena, platforms, delta }) {
     let pack = [];
+		const updates = 10;
     for (let i of Object.keys(players)) {
-      for (let d = 0; d < 5; d++) {
-        players[i].update(arena, platforms, delta / 5);
+      for (let d = 0; d < updates; d++) {
+        players[i].update(arena, platforms, delta / updates);
       }
       pack.push(players[i].getUpdatePack());
     }
