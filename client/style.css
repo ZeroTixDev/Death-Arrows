@@ -1,0 +1,367 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Nunito", sans-serif;
+}
+body {
+  overflow: hidden;
+  background: #1a2733;
+  text-align: center;
+  font-size: 16px;
+}
+canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: #111;
+  border-radius: 1px;
+}
+.showNav:hover {
+  border: 5px solid black;
+}
+.overlay {
+  position: fixed; /* Sit on top of the page content */
+  display: flex; /* Hidden by default */
+  justify-content: center;
+  align-items: center;
+  width: 100%; /* Full width (cover the whole page) */
+  height: 100vh; /* Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7); /* Black background with opacity */
+  z-index: 500; /* Specify a stack order in case you're using a different order for other elements */
+}
+.settingsContainer {
+  min-width: 200px;
+  min-height: 400px;
+  max-height: 600px;
+  max-width: 900px;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  background: gray;
+  z-index: 501;
+  border-radius: 5px;
+  box-shadow: 0px 0px 5px #1a2733 inset;
+  position: relative;
+  display: flex;
+  justify-content: baseline;
+  align-items: center;
+  flex-direction: column;
+}
+.settingsContainer h1 {
+  color: white;
+  font-size: 2rem;
+  margin: 20px;
+  z-index: 502;
+  pointer-events: none;
+  margin-top: 40px;
+  margin-bottom: 10px;
+}
+.yes {
+  background: rgb(15, 173, 15);
+}
+.yes::before {
+  content: "On";
+}
+.no::before {
+  content: "Off";
+}
+.yes:hover,
+save:hover {
+  background: rgb(100, 255, 4);
+}
+.no {
+  background: rgb(229, 0, 0);
+}
+.no:hover {
+  background: rgb(246, 38, 6);
+}
+.settingsContainer div {
+  padding: 5px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  text-align: center;
+  max-height: 50px;
+}
+#saveButton {
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: rgb(15, 173, 15);
+  border-radius: 2px;
+  color: white;
+  padding: 2px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.settingsContainer label {
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+  padding: 2px;
+}
+.settingsContainer button {
+  border: none;
+  outline: none;
+  border-radius: 2px;
+  cursor: pointer;
+  margin: 2px;
+  color: white;
+  font-size: 1.2rem;
+  padding: 5px;
+  height: 40px;
+  width: 50px;
+}
+nav span {
+  background-color: transparent;
+  width: 70px;
+  height: 50px;
+  border: none;
+  margin-left: 10px;
+  padding: 10px;
+  color: white;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: all 0.1s linear;
+
+  cursor: pointer;
+  z-index: 100;
+}
+.back {
+  background-image: url(./graphics/exit-door.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 30px 30px;
+  position: absolute;
+  right: 0;
+  /*top: 0; */
+}
+.settings {
+  background-image: url(./graphics/settings.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 30px 30px;
+  position: absolute;
+  right: 70px;
+  /* right: 0;
+  top: 0;*/
+}
+.name {
+  left: 50px;
+  position: absolute;
+  justify-content: baseline;
+  width: 250px;
+  border: none;
+  cursor: default;
+  text-align: left;
+}
+.circle {
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  left: 0px;
+  transform: scale(0.7);
+  width: 50px;
+  cursor: default;
+  border: none;
+}
+.back:hover,
+.settings:hover {
+  background-color: rgba(15, 62, 115, 0.78);
+}
+
+nav {
+  position: absolute;
+  height: 50px;
+  transform: scale(0.9);
+  width: 100%;
+  top: 41px;
+  pointer-events: auto;
+  background-color: rgba(39, 55, 73, 0.78);
+  border-bottom: 1px solid #000;
+  transition: all 0.05s linear;
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+}
+.container {
+  width: 1600px;
+  height: 900px;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 300;
+  /*border: 5px solid black;*/
+}
+.container .bottom {
+  position: absolute;
+  font-size: 1rem;
+  bottom: 0;
+}
+.container h1 {
+  font-size: 1.9rem;
+  margin-top: 1px;
+}
+.menu {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #1a2733;
+
+  z-index: 200;
+}
+.menu input {
+  border: none;
+  outline: none;
+  padding: 10px;
+  border-radius: 5px;
+}
+h1 {
+  color: white;
+  font-weight: bold;
+  font-size: 4rem;
+}
+.menu h1 {
+  position: relative;
+  top: -10px;
+}
+.play {
+  position: relative;
+  width: 180px;
+  height: 60px;
+  color: white;
+  text-decoration: none;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 60px;
+  letter-spacing: 2px;
+  margin: 20px;
+  transition: 0.5s;
+  background: #0b0bec1c;
+}
+.links {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  text-decoration: none;
+  text-align: center;
+  margin: 5px;
+  color: white;
+  font-size: 0.9rem;
+  background: #5c2d34;
+  padding: 15px;
+  z-index: 1000;
+  cursor: pointer;
+  pointer-events: auto;
+  width: 140px;
+  transition: all 0.05s linear;
+}
+p {
+  text-align: center;
+  color: white;
+  margin: 20px;
+}
+.super {
+  letter-spacing: 3px;
+  color: white;
+  position: absolute;
+  bottom: 45px;
+}
+.links:hover {
+  background: #783741;
+}
+.leaderboard {
+  width: 100px;
+  height: 125px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.play:hover {
+  background: #24199dfe url(./graphics/pixel.png);
+  transition-delay: 0.8s;
+  background-size: 180px;
+  animation: animate 0.8s steps(8) forwards;
+}
+.play::after:hover {
+  background: #24199d6d;
+  z-index: 200;
+}
+@keyframes animate {
+  0% {
+    background-position-y: 0px;
+  }
+  100% {
+    background-position-y: -480px;
+  }
+}
+#game {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+}
+#chatHolder {
+  display: none;
+  position: absolute;
+  width: 100%;
+  bottom: 35%;
+  text-align: center;
+  z-index: 0;
+}
+
+#chatBox {
+  padding: 1px;
+  font-size: 20px;
+  color: #1f1633;
+  background-color: rgba(219, 210, 210, 0.267);
+  width: 28%;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  transform: scale(1.2);
+  /*text-shadow: 1px 1px 2px black, 0 0 25px blue, 0 0 5px darkblue;*/
+  /*border: 1px solid #cccccc;*/
+  /* box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+  transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;*/
+  outline: none;
+}
+#chatBox:focus {
+  border-color: rgba(82, 168, 236, 0.8);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset,
+    50 50 50px rgba(82, 168, 236, 0.6);
+  outline: 0 none;
+}
+.chat::-webkit-input-placeholder {
+  color: #333;
+}
+.chat:-moz-placeholder {
+  color: #333;
+  opacity: 1;
+}
+.chat::-moz-placeholder {
+  color: #333;
+  opacity: 1;
+}
+.chat:-ms-input-placeholder {
+  color: #333;
+}
