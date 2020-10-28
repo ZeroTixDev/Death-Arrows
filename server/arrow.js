@@ -1,11 +1,13 @@
 module.exports = class Arrow {
-  constructor(x, y, angle, speed, id, parent) {
+  constructor(x, y, angle, speed, id, parent, around = false) {
     this.x = x;
     this.y = y;
     this.angle = angle;
     this.xv = Math.cos(this.angle) * (speed * 1) * 20;
     this.yv = Math.sin(this.angle) * (speed * 1) * 20;
+		this.speed = speed;
     this.life = 3;
+		this.around = around;
     this.height = 23 * 2;
     this.width = 10 * 2;
     this.dead = false;
@@ -41,7 +43,8 @@ module.exports = class Arrow {
     return {
       id: this.id,
       x: this.x,
-      y: this.y
+      y: this.y,
+			angle:this.angle,
     };
   }
   getInitPack() {
@@ -59,10 +62,16 @@ module.exports = class Arrow {
   update(platforms, delta) {
     this.x += this.xv * delta;
     this.y += this.yv * delta;
+		if(this.around){
+			this.xv = Math.cos(this.angle) * this.speed * 20;
+			this.yv = Math.sin(this.angle) * this.speed * 20;
+			this.angle += Math.PI * 2* delta
+		}
     this.life -= delta;
     if (this.life < 0) {
       this.dead = true;
     }
+
     /*
     x*cos(t) - y*sin(t)
     */

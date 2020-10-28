@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap');
 * {
   margin: 0;
   padding: 0;
@@ -16,6 +17,7 @@ canvas {
   top: 0;
   background: #111;
   border-radius: 1px;
+	transition:all 0.2s linear;
 }
 .showNav:hover {
   border: 5px solid black;
@@ -34,6 +36,11 @@ canvas {
   background-color: rgba(0, 0, 0, 0.7); /* Black background with opacity */
   z-index: 500; /* Specify a stack order in case you're using a different order for other elements */
 }
+#gameContainer div{
+	box-sizing:content-box;
+	border-radius:2px;
+	pointer-events: auto;
+}
 .settingsContainer {
   min-width: 200px;
   min-height: 400px;
@@ -42,15 +49,58 @@ canvas {
   width: 100%;
   height: 100%;
   overflow-y: auto;
-  background: gray;
+  background: rgb(112, 116, 132);
   z-index: 501;
-  border-radius: 5px;
+  border-radius: 3px;
   box-shadow: 0px 0px 5px #1a2733 inset;
   position: relative;
   display: flex;
   justify-content: baseline;
   align-items: center;
   flex-direction: column;
+}
+.helpContainer{
+	min-width: 200px;
+  min-height: 400px;
+  max-height: 600px;
+  max-width: 900px;
+  width: 100%;
+  height: 100vh;
+	overflow:auto;
+	background:rgb(112, 116, 132);
+	z-index: 502;
+  border-radius: 3px;
+  box-shadow: 0px 0px 5px #1a2733 inset;
+	  position: relative;
+  display: flex;
+  justify-content: baseline;
+  align-items: center;
+  flex-direction: column;
+}
+.helpContainer div{
+	color: white;
+  font-size: 2rem;
+  margin: 20px;
+  z-index: 502;
+  pointer-events: none;
+	background:rgba(0,0,0,0.6);
+}
+.exit{
+	position: fixed;
+	left:0;
+	bottom:0;
+	width:100%;
+	height:40px;
+	border:none;
+	outline:none;
+	cursor:pointer;
+	background:rgb(7, 186, 7);
+	transition:all 0.2s linear;
+	color:white;
+	font-size:2rem;
+}
+.exit:hover{
+	background:rgb(7, 186, 93);
 }
 .settingsContainer h1 {
   color: white;
@@ -59,7 +109,6 @@ canvas {
   z-index: 502;
   pointer-events: none;
   margin-top: 40px;
-  margin-bottom: 10px;
 }
 .yes {
   background: rgb(15, 173, 15);
@@ -136,7 +185,6 @@ nav span {
   cursor: pointer;
   transition: all 0.1s linear;
 
-  cursor: pointer;
   z-index: 100;
 }
 .back {
@@ -158,6 +206,25 @@ nav span {
   /* right: 0;
   top: 0;*/
 }
+.help{
+/*	background-image: url(./graphics/question.png);
+	background-repeat:no-repeat;
+	background-position: center;
+	background-size:30px 30px;*/
+	position: absolute;
+	right:140px;
+}
+.help:before{
+	content:'?';	
+	color:white;
+	font-size:2.1rem;
+	text-align:center;
+
+	position: relative;
+	top:-6px;
+	padding-top:0px;
+	font-family: 'Roboto', sans-serif;
+}
 .name {
   left: 50px;
   position: absolute;
@@ -178,7 +245,7 @@ nav span {
   border: none;
 }
 .back:hover,
-.settings:hover {
+.settings:hover,.help:hover {
   background-color: rgba(15, 62, 115, 0.78);
 }
 

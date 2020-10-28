@@ -3,6 +3,7 @@
   <head>
     <title>Arrows</title>
     <script src="https://rawgit.com/kawanet/msgpack-lite/master/dist/msgpack.min.js"></script>
+    <script src="./ulti/meter.min.js"></script>
     <script src="game.js" defer></script>
     <link href="style.css" rel="stylesheet" type="text/css" type="text/css" />
     <script
@@ -49,6 +50,7 @@
         <nav style="visibility: none;">
           <span class="back"></span>
           <span class="settings"></span>
+					<span class="help"></span>
           <span class="name"></span>
           <span class="circle"></span>
         </nav>
@@ -72,11 +74,21 @@
           <button id="saveButton">Save</button>
           <h1>Settings</h1>
           <div>
-            <label for="interpolation">Interpolation</label>
+            <label for="interpolation" href="#">Interpolation</label>
             <button id="interpolation" class="yes"></button>
           </div>
         </div>
       </form>
+			<form class="overlay" id="helpOverlay" style="display:none;">
+				<div class="helpContainer">
+					<h1>Help</h1>
+					<div> WASD to Move </div>
+					<div> Z or SHIFT to Arrow </div>
+					<div> Left and Right to change arrow direction </div>
+					<div> Objective: Kill as much people as you can with your powerful arrows and get on the all-time leaderboard </div>
+					<button class="exit">Thanks C:</button>
+				</div>
+			</form>
     </div>
   </body>
 </html>

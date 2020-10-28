@@ -13,10 +13,17 @@ const menuGame = document.querySelector(".container nav");
 const backButton = document.querySelector(".back");
 const nameSpan = document.querySelector(".name");
 const playerCircle = document.querySelector(".circle");
+const leaveHelp = document.querySelector(".exit")
+const helpButton = document.querySelector(".help")
 const overlay = document.querySelector(".overlay");
+const helpOverlay = document.querySelector("#helpOverlay")
 const settings = document.querySelector(".settings");
 const interpolateButton = document.getElementById("interpolation");
 const saveButton = document.getElementById("saveButton");
+const meter = new FPSMeter(mainDiv,{theme:"colorful",heat:1,graph:1,history:20, show:'fps',smoothing:5,position:'absolute'})
+const meterElement = document.querySelector("#gameContainer div")
+meterElement.style.position = "absolute"
+meterElement.style.left = "1411px"
 let config;
 if (localStorage.getItem("config") == null) {
   config = { interp: true };
@@ -60,7 +67,6 @@ saveButton.addEventListener("mouseup", (event) => {
   overlay.style.display = "none";
   notMove = false;
 });
-window.addEventListener("beforeunload", () => {});
 interpolateButton.addEventListener("mouseup", (event) => {
   event.preventDefault();
   config.interp = !config.interp;
@@ -77,8 +83,21 @@ settings.addEventListener("mouseup", (event) => {
   overlay.style.display = "flex";
   notMove = true;
 });
+helpButton.addEventListener("mouseup",(event)=>{
+	event.preventDefault()
+	helpOverlay.style.display = "flex"
+	notMove = true;
+})
+leaveHelp.addEventListener("mouseup",(event)=>{
+	event.preventDefault()
+	helpOverlay.style.display = "none"
+	notMove = false;
+})
+helpOverlay.addEventListener("submit",(event)=>event.preventDefault())
+overlay.addEventListener("submit",(event)=>event.preventDefault())
 backButton.addEventListener("mouseup", (event) => {
   event.preventDefault();
+	if(notMove)return;
   const payload = {
     type: "back"
   };
@@ -184,8 +203,8 @@ class Arrow {
     this.width = initPack.width;
     this.id = initPack.id;
     this.parent = initPack.parent;
-    this.states = [{ x: this.x, y: this.y }];
-    this.serverState = { x: this.x, y: this.y };
+    this.states = [{ x: this.x, y: this.y , angle:this.angle}];
+    this.serverState = { x: this.x, y: this.y, angle:this.angle};
     arrows[this.id] = this;
     this.currentTime = 0;
   }
@@ -193,6 +212,7 @@ class Arrow {
     if (delta <= 1 / serverTick && config.interp) {
       this.x = lerp(this.x, this.states[0].x, delta * serverTick);
       this.y = lerp(this.y, this.states[0].y, delta * serverTick);
+			this.angle = lerp(this.angle, this.states[0].angle, delta * serverTick)
       this.states[0].x = lerp(
         this.states[0].x,
         this.serverState.x,
@@ -203,11 +223,14 @@ class Arrow {
         this.serverState.y,
         delta * serverTick
       );
+			this.states[0].angle = lerp(this.states[0].angle, this.serverState.angle, delta * serverTick)
     } else {
       this.x = this.states[0].x;
       this.y = this.states[0].y;
+			this.angle = this.states[0].angle
       this.states[0].x = this.serverState.x;
       this.states[0].y = this.serverState.y;
+			this.states[0].angle = this.serverState.angle;
     }
     // console.log(this.x + "x",this.states[0].x + "states x",this.serverState.x + "server x")
   }
@@ -358,6 +381,7 @@ class Player {
       this.rot = this.rotStates[0].rot;
       this.states[0].x = this.serverState.x;
       this.states[0].y = this.serverState.y;
+			this.rotStates[0].rot = this.serverState.rot;
     }
   }
   draw(delta) {
@@ -631,7 +655,9 @@ ws.addEventListener("message", (datas) => {
               } else if (name === "y") {
                 // newState.y = data.y;
                 arrow.serverState.y = data.y;
-              } else {
+              } else if(name === "angle"){
+								arrow.serverState.angle = data.angle;
+							}else{
                 arrow[name] = data[name];
               }
             }
@@ -790,6 +816,7 @@ let initial = 0;
 let currentTime = 0;
 function render(time) {
   window.requestAnimationFrame(render);
+	meter.tickStart()
   if (!players[selfId]) {
     ctx.fillStyle = "white";
     ctx.font = "50px Arial";
@@ -957,7 +984,7 @@ function render(time) {
   ctx.stroke();
   ctx.lineWidth = 1;
   const superCooldown = players[selfId].cooldowns.super;
-  ctx.fillStyle = superCooldown.current <= 0 ? "#3337f2" : "#4f52d6";
+  ctx.fillStyle = superCooldown.current <= 0 ? "#c9740a" : "#4f52d6";
   ctx.fillRect(canvas.width / 2 - 100, canvas.height - 50, 200, 50);
   ctx.fillStyle = "rgba(6, 3, 6,0.6)";
   ctx.fillRect(
@@ -966,6 +993,7 @@ function render(time) {
     200,
     -50 * (superCooldown.current / superCooldown.max)
   );
+	meter.tick()
 }
 function lerp(start, end, time) {
   return start * (1 - time) + end * time;

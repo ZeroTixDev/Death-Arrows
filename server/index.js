@@ -177,16 +177,17 @@ wss.on("connection", (ws) => {
         }
         if (players[clientId].makeSuper) {
           const player = players[clientId];
-          for (let i = 0; i < 360; i += 30) {
+          for (let i = 0; i < 360; i += 20) {
             const rot = i * (Math.PI / 180);
             const arrowId = uuid.v4();
             arrows[arrowId] = new Arrow(
               player.pos.x + Math.sin(rot + Math.PI / 2) * 10,
               player.pos.y - Math.cos(rot + Math.PI / 2) * 10,
               rot + Math.PI / 2,
-              20,
+              30,
               arrowId,
-              clientId
+              clientId,
+							true
             );
             initPack.arrow.push(arrows[arrowId].getInitPack());
           }
