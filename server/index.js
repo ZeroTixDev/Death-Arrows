@@ -10,6 +10,8 @@ const Platform = require("./platform");
 const Player = require("./player");
 const Arrow = require("./arrow");
 const Vector = require("./vector");
+const Database  = require("@replit/database")
+const db = new Database()
 app.use(express.static("client"));
 const clients = {};
 const players = {};
@@ -29,7 +31,11 @@ let lastTime = Date.now();
 let width;
 let height;
 let spawns = [];
-let size;
+let size; 
+let highscore;
+(async ()=>{
+	highscore = (await db.get("highscore"))
+})()
 try {
   let grid = require("./map.json");
   size = grid.length;
@@ -75,6 +81,13 @@ function updateGameState(clients, players) {
         players[i].cooldowns.spawn.current = players[i].cooldowns.spawn.max;
         if (players[arrows[j].parent]) {
           players[arrows[j].parent].kills++;
+					if(players[arrows[j].parent].kills > highscore.score){
+						(async ()=>{
+							highscore = {name:players[arrows[j].parent].username, score:players[arrows[j].parent].kills}
+							await db.set("highscore",highscore)
+							console.log(highscore)
+						})()
+					}
         }
         removePack.arrow.push({ id: arrows[j].id, type: "player" });
         delete arrows[j];
@@ -111,12 +124,13 @@ function updateGameState(clients, players) {
           })
         );
       } else { */
-      clientSocket.send(
-        msgpack.encode({
-          type: "update",
-          datas: { player: pack, arrow: arrowPack }
-        })
-      );
+					clientSocket.send(
+						msgpack.encode({
+							type: "update",
+							datas: { player: pack, arrow: arrowPack },
+							highscore,
+						})
+      	);
       if (removePack.player.length > 0 || removePack.arrow.length > 0) {
         clientSocket.send(
           msgpack.encode({
@@ -151,8 +165,9 @@ wss.on("connection", (ws) => {
             datas: {
               player: [...Player.getAllInitPack({ id: clientId, players })],
               arrow: [...Arrow.getAllInitPack({ arrows })],
-              platforms
+              platforms,
             },
+						highscore,
             arena,
             serverTick
           })
@@ -171,7 +186,7 @@ wss.on("connection", (ws) => {
             arrowId,
             clientId
           );
-          player.arrowForce = 0;
+          player.arrowForce = 10;
           initPack.arrow.push(arrows[arrowId].getInitPack());
           players[clientId].makeArrow = false;
         }

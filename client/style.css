@@ -271,6 +271,7 @@ nav {
   justify-content: center;
   pointer-events: none;
   z-index: 300;
+	transition:all 0.2s linear;
   /*border: 5px solid black;*/
 }
 .container .bottom {
@@ -306,6 +307,13 @@ h1 {
 .menu h1 {
   position: relative;
   top: -10px;
+	-webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; 
+	animation:fadeIn 0.5s linear;
 }
 .play {
   position: relative;
@@ -318,8 +326,15 @@ h1 {
   line-height: 60px;
   letter-spacing: 2px;
   margin: 20px;
-  transition: 0.5s;
+  transition: all 0.5s linear;
   background: #0b0bec1c;
+}
+@keyframes fadeIn{
+	0%{
+		opacity:0;
+	}
+	100%{		opacity:1;
+	}
 }
 .links {
   position: absolute;
@@ -328,14 +343,15 @@ h1 {
   text-decoration: none;
   text-align: center;
   margin: 5px;
-  color: white;;
+  color: white;
   font-size: 1.9rem;
   background: #5c2d34;
   padding: 30px;
   z-index: 1000;
   cursor: pointer;
   pointer-events: auto;
-  transition: all 0.05s linear;
+  transition: background 0.05s linear;
+	animation:fadeIn 1.5s linear;
 }
 p {
   text-align: center;

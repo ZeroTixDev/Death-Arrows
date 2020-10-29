@@ -61,11 +61,11 @@ module.exports = class Player {
     //just test
     this.currentCooldown = 1.5;*/
     this.cooldowns = {
-      arrow: new Cooldown(1.5, 1.5),
-      super: new Cooldown(0, 30), //No let me test, I wanna see how laggy it get
+      arrow: new Cooldown(1, 1.5),
+      super: new Cooldown(5, 30), //No let me test, I wanna see how laggy it get
       spawn: new Cooldown(3, 3)
     };
-    this.arrowForce = 0;
+    this.arrowForce = 10;
     this.maxForce = 300;
     this.username =
       randomConso().toUpperCase() +
@@ -141,7 +141,7 @@ module.exports = class Player {
   }
   static pack({ players, arena, platforms, delta }) {
     let pack = [];
-		const updates = 10;
+		const updates = 30;
     for (let i of Object.keys(players)) {
       for (let d = 0; d < updates; d++) {
         players[i].update(arena, platforms, delta / updates);

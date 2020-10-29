@@ -8,8 +8,8 @@ module.exports = class Arrow {
 		this.speed = speed;
     this.life = 3;
 		this.around = around;
-    this.height = 23 * 2;
-    this.width = 10 * 2;
+    this.height = 10 * 2;
+    this.width = 23 * 2;
     this.dead = false;
     this.id = id;
     this.parent = parent;
@@ -24,7 +24,7 @@ module.exports = class Arrow {
   }
   static pack({ arrows, removePack, platforms, delta }) {
     let pack = [];
-		const updates = 10;
+		const updates = 30;
     for (let i of Object.keys(arrows)) {
       for (let d = 0; d < updates; d++) {
         arrows[i].update(platforms, delta / updates);
@@ -45,6 +45,7 @@ module.exports = class Arrow {
       x: this.x,
       y: this.y,
 			angle:this.angle,
+			around:this.around,
     };
   }
   getInitPack() {
