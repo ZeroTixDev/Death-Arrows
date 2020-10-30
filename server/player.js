@@ -139,13 +139,15 @@ module.exports = class Player {
     delete players[id];
     removePack.player.push(id);
   }
-  static pack({ players, arena, platforms, delta }) {
+  static pack({ players, arena, platforms, currentTime }) {
     let pack = [];
-		const updates = 30;
+		let copy = currentTime;
     for (let i of Object.keys(players)) {
-      for (let d = 0; d < updates; d++) {
-        players[i].update(arena, platforms, delta / updates);
-      }
+			copy = currentTime;
+			while(copy > 1/60){
+				copy -= 1/60
+				players[i].update(arena, platforms, 1/60);
+			}
       pack.push(players[i].getUpdatePack());
     }
     return pack;

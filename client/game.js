@@ -300,12 +300,12 @@ class Arrow {
 			this.currentTime -= 0.009;
 			if(config.particles){
 			//	if(!this.around){
-				particles.push(
+			/*	particles.push(
 					new Particle( center.x, center.y, Math.random() * 6 + 1, "#665578", {
 						x: ( Math.random() - 0.5 ) * ( Math.random() * 25 ),
 						y: ( Math.random() - 0.5 ) * ( Math.random() * 25 )
 					} )
-				);
+			);*/
 		/*		}else{
 					particles.push(
 					new Particle( center.x, center.y, Math.random() * 6 + 1, "rgb(147, 50, 168)", {
@@ -483,7 +483,7 @@ class Player {
 		ctx.arc(
 			x,
 			y,
-			this.radius + 5,
+			this.radius + 8,
 			0,
 			-Math.PI * 2 * ( this.cooldowns.arrow.current / this.cooldowns.arrow.max ),
 			false

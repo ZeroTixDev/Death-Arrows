@@ -22,13 +22,15 @@ module.exports = class Arrow {
     }
     return initPacks;
   }
-  static pack({ arrows, removePack, platforms, delta }) {
+  static pack({ arrows, removePack, platforms, currentTime }) {
     let pack = [];
-		const updates = 30;
+		let copy = currentTime
     for (let i of Object.keys(arrows)) {
-      for (let d = 0; d < updates; d++) {
-        arrows[i].update(platforms, delta / updates);
-      }
+			copy = currentTime
+      while(copy > 1/60) {
+				copy -= 1/60
+        arrows[i].update(platforms, 1/60);
+			}
       if (arrows[i].dead) {
         removePack.arrow.push({ id: arrows[i].id, type: "wall" });
         delete arrows[i];

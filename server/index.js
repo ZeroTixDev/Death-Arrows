@@ -20,6 +20,7 @@ const platforms = [];
 const initPack = { player: [], arrow: [] };
 const removePack = { player: [], arrow: [] };
 const arena = new Vector(3000, 3000);
+
 const serverTick = 40;
 app.get("/", (_, res) => res.sendFile("client/index.html"));
 server.on('upgrade', (request, socket, head) => {
@@ -32,6 +33,7 @@ let width;
 let height;
 let spawns = [];
 let size; 
+let currentTime = 0;
 let highscore;
 (async ()=>{
 	highscore = (await db.get("highscore"))
@@ -59,7 +61,6 @@ try {
 } catch (err) {
   console.log(err);
 }
-
 function randomSpawnPos() {
   const spawn = spawns[Math.floor(Math.random() * spawns.length)];
   return {
@@ -69,35 +70,43 @@ function randomSpawnPos() {
 }
 function updateGameState(clients, players) {
   Player.collision({ playerArray: Object.entries({ ...players }), players });
-  for (let i of Object.keys(players)) {
-    const player = players[i];
-    for (let j of Object.keys(arrows)) {
-      if (
-        collideCircleWithRotatedRectangle(player, arrows[j]) &&
-        arrows[j].parent !== players[i].id &&
-        players[i].cooldowns.spawn.current <= 0
-      ) {
-        players[i].pos = randomSpawnPos();
-        players[i].cooldowns.spawn.current = players[i].cooldowns.spawn.max;
-        if (players[arrows[j].parent]) {
-          players[arrows[j].parent].kills++;
-					if(players[arrows[j].parent].kills > highscore.score){
-						(async ()=>{
-							highscore = {name:players[arrows[j].parent].username, score:players[arrows[j].parent].kills}
-							await db.set("highscore",highscore)
-							console.log(highscore)
-						})()
-					}
-        }
-        removePack.arrow.push({ id: arrows[j].id, type: "player" });
-        delete arrows[j];
-      }
-    }
-  }
   const delta = (Date.now() - lastTime) / 1000;
   lastTime = Date.now();
-  let pack = Player.pack({ players, arena, platforms, delta });
-  let arrowPack = Arrow.pack({ arrows, removePack, platforms, delta });
+	currentTime += delta;
+	let copyTime = currentTime;
+	while(copyTime > 1/60){
+		copyTime -= 1/60;
+		for (let i of Object.keys(players)) {
+			const player = players[i];
+			for (let j of Object.keys(arrows)) {
+				if (
+					collideCircleWithRotatedRectangle(player, arrows[j]) &&
+					arrows[j].parent !== players[i].id &&
+					players[i].cooldowns.spawn.current <= 0
+				) {
+					players[i].pos = randomSpawnPos();
+					players[i].cooldowns.spawn.current = players[i].cooldowns.spawn.max;
+					if (players[arrows[j].parent]) {
+						players[arrows[j].parent].kills++;
+						if(players[arrows[j].parent].kills > highscore.score){
+							(async ()=>{
+								highscore = {name:players[arrows[j].parent].username, score:players[arrows[j].parent].kills}
+								await db.set("highscore",highscore)
+								console.log(highscore)
+							})()
+						}
+					}
+					removePack.arrow.push({ id: arrows[j].id, type: "player" });
+					delete arrows[j];
+				}
+			}
+		}
+	}
+  let pack = Player.pack({ players, arena, platforms, currentTime});
+  let arrowPack = Arrow.pack({ arrows, removePack, platforms, currentTime });
+	while(currentTime >1/60){
+		currentTime -= 1/60
+	}
   let nextRound = false;
   //console.log(time);
   //console.log(removePack);
