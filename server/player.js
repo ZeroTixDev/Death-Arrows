@@ -49,7 +49,7 @@ module.exports = class Player {
     this.pos = pos;
     this.keys = keys;
     this.vel = new Vector(0, 0);
-    this.maxSpd = 350;
+    this.maxSpd = 375;
     this.radius = 25; //lol
     this.chatMsg = "Hello";
     this.chatTime = 5;
@@ -76,7 +76,7 @@ module.exports = class Player {
       randomVowel() +
       randomConso() +
       randomVowel();
-    this.friction = 0.75;
+    this.friction = 0.65;
     this.mass = 1;
     this.lastArrow = false;
     this.makeArrow = false;
@@ -233,13 +233,6 @@ module.exports = class Player {
     if (this.vel.y < -this.maxSpd) this.vel.y = -this.maxSpd;
     if (this.vel.x > this.maxSpd) this.vel.x = this.maxSpd;
     if (this.vel.x < -this.maxSpd) this.vel.x = -this.maxSpd;
-    if (this.arrowState) {
-      this.pos.x += this.vel.x * 0.7 * delta;
-      this.pos.y += this.vel.y * 0.7 * delta;
-    } else {
-      this.pos.x += this.vel.x * delta;
-      this.pos.y += this.vel.y * delta;
-    }
     if ((this.rotateKeys[0] || this.pendingRotate[0]) && this.arrowState)
       this.rot -= Math.PI * delta;
     if ((this.rotateKeys[1] || this.pendingRotate[0]) && this.arrowState)
@@ -249,10 +242,14 @@ module.exports = class Player {
     }
     if (!this.movementKeys[0] && !this.movementKeys[1]) {
       this.vel.y *= Math.pow(this.friction, delta * 15);
-    }
+    }else{
+				this.vel.y*=Math.pow(0.89,delta*16)
+		}
     if (!this.movementKeys[2] && !this.movementKeys[3]) {
       this.vel.x *= Math.pow(this.friction, delta * 15);
-    }
+    }else{
+			this.vel.x*=Math.pow(0.89,delta*16)
+		}
     if (this.pos.x - this.radius < 0) this.pos.x = this.radius;
     if (this.pos.x + this.radius > arena.x) this.pos.x = arena.x - this.radius;
     if (this.pos.y - this.radius < 0) this.pos.y = this.radius;
@@ -260,6 +257,13 @@ module.exports = class Player {
     this.chatTime -= delta;
     if (this.arrowState) {
       if (this.arrowForce < this.maxForce) this.arrowForce += 100 * delta; //5
+    }
+		if (this.arrowState) {
+      this.pos.x += this.vel.x * 0.7 * delta;
+      this.pos.y += this.vel.y * 0.7 * delta;
+    } else {
+      this.pos.x += this.vel.x * delta;
+      this.pos.y += this.vel.y * delta;
     }
     this.hitWall = false;
     this.pendingKeys = [false, false, false, false];

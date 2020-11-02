@@ -1,4 +1,4 @@
-const ws = new WebSocket( "wss://arrows.zerotixdev.repl.co" );
+let ws = new WebSocket( "wss://arrows.zerotixdev.repl.co" );
 ws.binaryType = "arraybuffer";
 let players = Object.create( null );
 let arrows = Object.create( null );
@@ -138,7 +138,7 @@ backButton.addEventListener( "mouseup", ( event ) => {
 	const payload = {
 		type: "back"
 	};
-	ws.send( JSON.stringify( payload ) );
+	if(ws) ws.send( JSON.stringify( payload ) );
 	menu.style.display = "flex";
 	game.style.display = "none";
 } );
@@ -157,10 +157,12 @@ function showMenu( event ) {
 	}
 }
 window.addEventListener("beforeunload",()=>{
-	config.name = players[selfId].username;
+	config.name = (username )? username : config.username;
 	localStorage.setItem("config",JSON.stringify(config))
 })
 //window.addEventListener("mousemove", showMenu);
+let afr;
+let username;
 function switchMenu() {
 	menu.style.display = "none";
 	game.style.display = "block";
@@ -168,8 +170,8 @@ function switchMenu() {
 		const payload = {
 			type: "join"
 		};
-		ws.send( JSON.stringify( payload ) );
-		if(config.name !== "") ws.send(JSON.stringify({type:"chat",value:"/name " + config.name,}))
+		if(ws) ws.send( JSON.stringify( payload ) );
+		if(config.name !== "" && ws) ws.send(JSON.stringify({type:"chat",value:"/name " + config.name,}))
 		window.addEventListener( "keydown", trackKeys );
 		window.addEventListener( "keyup", trackKeys );
 		canvas.addEventListener( "mousemove", ( event ) => {
@@ -291,8 +293,8 @@ class Arrow {
 		this.currentTime += delta;
 		this.interpolate( delta );
 		const [ x, y ] = [
-			Math.round( this.x - players[ selfId ].pos.x + canvas.width / 2 ),
-			Math.round( this.y - players[ selfId ].pos.y + canvas.height / 2 )
+			Math.round( this.x - players[selfId].pos.x + canvas.width / 2 ),
+			Math.round( this.y - players[selfId].pos.y + canvas.height / 2 )
 		];
 	//	if(this.around){
 		const center = centerRect( this.x, this.y , this.width, this.height, this.angle )
@@ -337,15 +339,17 @@ class Platform {
 	}
 	draw() {
 		const [ x, y ] = [
-			Math.round( this.x - players[ selfId ].pos.x + canvas.width / 2 ),
-			Math.round( this.y - players[ selfId ].pos.y + canvas.height / 2 )];
+			Math.round( this.x - players[selfId].pos.x + canvas.width / 2 ),
+			Math.round( this.y - players[selfId].pos.y + canvas.height / 2 )];
 		ctx.lineWidth = 3;
 		/* ctx.fillStyle = `rgb(30,30,30)`;
 		ctx.strokeStyle = `rgb(30,30,30)`;*/
 		/* ctx.fillStyle = "#212752";
 		ctx.strokeStyle = "#212752";*/
-		ctx.fillStyle = "#455453";
-		ctx.strokeStyle = "#455453";
+		/*ctx.fillStyle = "#455453";
+		ctx.strokeStyle = "#455453";*/
+		ctx.fillStyle = "#0d191c"
+		ctx.strokeStyle = "#0d191c"
 		ctx.fillRect( x, y, this.width, this.height );
 		ctx.strokeRect( x, y, this.width, this.height );
 	}
@@ -390,8 +394,8 @@ class Particle {
 		ctx.globalAlpha = this.alpha;
 		//ctx.beginPath();
 		const [ x, y ] = [
-			Math.round( this.x - players[ selfId ].pos.x + canvas.width / 2 ),
-			Math.round( this.y - players[ selfId ].pos.y + canvas.height / 2 )
+			Math.round( this.x - players[selfId].pos.x + canvas.width / 2 ),
+			Math.round( this.y - players[selfId].pos.y + canvas.height / 2 )
 		];
 		ctx.fillStyle = this.color;
 		ctx.fillRect( x + this.size / 2, y + this.size / 2, this.size, this.size );
@@ -475,15 +479,15 @@ class Player {
 		this.currentTime += delta;
 		this.interpolate( delta );
 		const [ x, y ] = [
-			Math.round( this.pos.x - players[ selfId ].pos.x + canvas.width / 2 ),
-			Math.round( this.pos.y - players[ selfId ].pos.y + canvas.height / 2 )
+			Math.round( this.pos.x - players[selfId].pos.x + canvas.width / 2 ),
+			Math.round( this.pos.y - players[selfId].pos.y + canvas.height / 2 )
 		];
-		ctx.fillStyle = "#bababa";
+		ctx.fillStyle = "#a8a8a8";
 		ctx.beginPath();
 		ctx.arc(
 			x,
 			y,
-			this.radius + 8,
+			this.radius + 6,
 			0,
 			-Math.PI * 2 * ( this.cooldowns.arrow.current / this.cooldowns.arrow.max ),
 			false
@@ -541,7 +545,7 @@ class Player {
 						Math.random() * 25 -
 						12.5,
 						Math.random() * 3 + 1,
-						"#415a69", {
+						"0d191c", {
 							x: ( Math.random() - 0.5 ) * ( Math.random() * 10 ),
 							y: ( Math.random() - 0.5 ) * ( Math.random() * 10 )
 						}
@@ -639,7 +643,7 @@ function resize() {
 }
 resize();
 window.addEventListener( "resize", resize );
-window.requestAnimationFrame( render );
+afr = window.requestAnimationFrame( render );
 ws.addEventListener( "message", ( datas ) => {
 	const msg = msgpack.decode( new Uint8Array( datas.data ) );
 	byteLength = datas.data.byteLength;
@@ -682,7 +686,7 @@ ws.addEventListener( "message", ( datas ) => {
 				new Platform( platform.x, platform.y, platform.w, platform.h );
 			}
 		}
-		updateLeaderboard();
+		if(selfId && players[selfId]) updateLeaderboard();
 	} else if ( msg.type === "update" ) {
 		if ( msg.highscore ) highscore = msg.highscore;
 		if ( selfId ) {
@@ -728,7 +732,7 @@ ws.addEventListener( "message", ( datas ) => {
 							) {
 								
 								// update leaderboard
-								updateLeaderboard();
+								if(selfId && players[selfId]) updateLeaderboard();
 							}
 							if(pastName !== player.username && data.id === selfId){
 								config.name = player.username;
@@ -768,7 +772,7 @@ ws.addEventListener( "message", ( datas ) => {
 		for ( let data of msg.datas.player ) {
 			delete players[ data ];
 		}
-		updateLeaderboard();
+		if(selfId && players[selfId]) updateLeaderboard();
 		for ( let {
 				id,
 				type
@@ -808,7 +812,7 @@ ws.addEventListener( "message", ( datas ) => {
 								Math.random() * 50 -
 								25,
 								Math.random() * 5 + 1,
-								"#212752", {
+						"#0d191c", {
 									x: ( Math.random() - 0.5 ) * ( Math.random() * 25 ),
 									y: ( Math.random() - 0.5 ) * ( Math.random() * 25 )
 								}
@@ -819,6 +823,19 @@ ws.addEventListener( "message", ( datas ) => {
 			}
 			delete arrows[ id ];
 		}
+	}else if(msg.type === "kick"){
+		ws = undefined;
+				window.cancelAnimationFrame(afr)
+				ctx.fillStyle = "#111";
+				ctx.font = "50px Arial";
+				ctx.clearRect(0,0,canvas.width,canvas.height)
+				ctx.fillRect( 0, 0, canvas.width, canvas.height );
+				ctx.fillStyle = "white"
+				ctx.fillText(
+					"You have been kicked by an Administrator.",
+					canvas.width / 2,
+					canvas.height / 2
+				);
 	}
 } );
 
@@ -852,7 +869,7 @@ function trackKeys( event ) {
 			type: "keyUpdate",
 			keys: keys
 		};
-		ws.send( JSON.stringify( payload ) );
+		if(ws) ws.send( JSON.stringify( payload ) );
 	}
 }
 let stars = [];
@@ -881,8 +898,8 @@ class Star {
 			this.radius = Math.random() * 1.2;
 		}
 		const [ x, y ] = [
-			Math.round( this.x - players[ selfId ].pos.x + canvas.width / 2 ),
-			Math.round( this.y - players[ selfId ].pos.y + canvas.height / 2 )
+			Math.round( this.x - players[selfId].pos.x + canvas.width / 2 ),
+			Math.round( this.y - players[selfId].pos.y + canvas.height / 2 )
 		];
 		ctx.beginPath();
 		ctx.arc( x, y, this.radius, 0, 360 );
@@ -896,11 +913,12 @@ function getRandom( min, max ) {
 }
 
 function drawMap() {
-	const x = Math.round( canvas.width / 2 - players[ selfId ].pos.x );
-	const y = Math.round( canvas.height / 2 - players[ selfId ].pos.y );
+	const x = Math.round( canvas.width / 2 - players[selfId].pos.x );
+	const y = Math.round( canvas.height / 2 - players[selfId].pos.y );
 	// ctx.fillStyle = "rgb(200, 200, 200)";
 	// ctx.fillStyle = "#5a5e63";
-	ctx.fillStyle = "#bcd1d0";
+//	ctx.fillStyle = "#bcd1d0";
+		ctx.fillStyle = '#c3c7d6'
 	//arena color
 	ctx.fillRect( x, y, arena.x, arena.y );
 	/* const sizeX = arena.x / 2;
@@ -916,11 +934,10 @@ function drawMap() {
 let lastTime = 0;
 let initial = 0;
 let currentTime = 0;
-
 function render( time ) {
-	window.requestAnimationFrame( render );
+	afr = window.requestAnimationFrame( render );
 	meter.tickStart()
-	if ( !players[ selfId ] ) {
+	if (!selfId || !players[ selfId ] ) {
 		ctx.fillStyle = "white";
 		ctx.font = "50px Arial";
 		ctx.clearRect( 0, 0, canvas.width, canvas.height );
@@ -934,7 +951,9 @@ function render( time ) {
 	if ( !initial ) {
 		updateLeaderboard();
 		initial = 1;
+		gameStart = true;
 	}
+	username = players[selfId].username
 	if ( nameSpan.innerText !== players[ selfId ].username )
 		nameSpan.innerText = players[ selfId ].username;
 	const delta = ( time - lastTime ) / 1000;
@@ -961,14 +980,14 @@ function render( time ) {
 				type: "chat",
 				value: chatBox.value
 			};
-			ws.send( JSON.stringify( payLoad ) );
+			if(ws) ws.send( JSON.stringify( payLoad ) );
 		}
 		chatHolder.style.display = "none";
 		chatBox.value = "";
 	}
 	//i see what ur doing no rainbow!!!
 	//ctx.fillStyle = `rgb(35,35,35)`;
-	ctx.fillStyle = "#0c5753";
+	ctx.fillStyle = "#304347";
 	ctx.fillRect( 0, 0, canvas.width, canvas.height );
 
 	drawMap();
@@ -988,7 +1007,7 @@ function render( time ) {
 		}
 	}
 	ctx.fillStyle = "rgba(39, 55, 73, 0.68)";
-	ctx.fillRect( 45, 645, 210, 210 );
+	ctx.fillRect( 0, 696, 206, 206 );
 	// i put it at 5 pixels and moved this 5 pixels back and 10 pixels forward so
 	//it touch the actual side lmao
 	let playerCount = 0;
@@ -998,15 +1017,12 @@ function render( time ) {
 		if ( i === selfId ) {
 			/* if (rotLeft) player.serverState.rot -= Math.PI * 0.3 * delta;
 			if (rotRight) player.serverState.rot += Math.PI * 0.3 * delta;*/
-			ctx.fillStyle = "#dba400";
-			if ( player.place !== undefined && player.place === 1 ) {
-				ctx.fillStyle = "#0f0d06";
-			}
+			ctx.fillStyle = "#0f0d06";
 			ctx.beginPath();
 			ctx.arc(
-				Math.round( 50 + ( player.pos.x / arena.x ) * 200 ),
-				Math.round( 650 + ( player.pos.y / arena.y ) * 200 ),
-				5,
+				Math.round( 3 + ( player.pos.x / arena.x ) * 200 ),
+				Math.round( 698 + ( player.pos.y / arena.y ) * 200 ),
+				3,
 				0,
 				Math.PI * 2
 			);
@@ -1038,7 +1054,7 @@ function render( time ) {
 		}
 		arrow.draw( delta );
 	}
-	ctx.fillStyle = "rgb(255, 255, 255)";
+	ctx.fillStyle = "black";
 	ctx.font = "20px Verdana, Geneva, sans-serif";
 	ctx.fillText( byteLength + " bytes", 1530, 880 );
 	ctx.font = "40px Verdana, Geneva, sans-serif";
@@ -1047,43 +1063,42 @@ function render( time ) {
 	ctx.fillStyle = "black";
 	ctx.fillText(Math.round(time / 1000), 1600 / 2, 40);*/
 	ctx.fillStyle = "rgba(39, 55, 73, 0.68)";
-	ctx.fillRect( 1150, 40, 400, lbPlayers.length * 30 + 15 + 40 );
+	ctx.fillRect( 1275, 50, 275, lbPlayers.length * 40 + 15 + 80 );
 	//lbPlayers.sort((a, b) => b.kills - a.kills);
 	lbPlayers = lbPlayers.slice( 0, 4 );
 	ctx.font = "30px Verdana, Geneva, sans-serif";
 	for ( let i of Object.keys( lbPlayers ) ) {
 		ctx.textAlign = "left";
-		if ( lbPlayers[ i ].type === "Other" ) ctx.fillStyle = "#c73636";
+		if ( lbPlayers[ i ].type === "Other" ) ctx.fillStyle = "black";
 		else {
-			ctx.fillStyle = "#03170d";
+			ctx.fillStyle = "white";
 		}
 		ctx.font = "25px Verdana, Geneva, sans-serif";
 		if ( lbPlayers[ i ].type !== "YouLol" ) {
 			let p = parseInt( i, 10 ) + 1;
 			ctx.fillText(
 				p + ". " + lbPlayers[ i ].name + ": " + lbPlayers[ i ].kills,
-				1160,
-				110 + i * 30
+				1290,
+				150 + i * 50
 			);
 		} else {
-			ctx.fillStyle = "#03170d";
+			ctx.fillStyle = "white";
 			ctx.fillText(
 				index + ". " + lbPlayers[ i ].name + ": " + lbPlayers[ i ].kills,
-				1160,
-				110 + i * 30
+				1290,
+				150 + i * 50
 			);
 		}
 		ctx.textAlign = "center";
 	}
-
 	ctx.font = "25px Verdana, Geneva, sans-serif";
-	ctx.fillStyle = "#e802a3";
-	ctx.fillText( `Players Online: ${playerCount}`, 1350, 70 );
+	ctx.fillStyle = "white";
+	ctx.fillText( `Players Online: ${playerCount}`, 1275 + 275/2, 90 );
 	ctx.strokeStyle = "rgb(0, 0, 0)";
 	ctx.lineWidth = 2;
 	ctx.beginPath();
-	ctx.moveTo( 1150, 80 );
-	ctx.lineTo( 1550, 80 );
+	ctx.moveTo( 1275, 110 );
+	ctx.lineTo( 1550, 110 );
 	ctx.stroke();
 	ctx.lineWidth = 1;
 	const superCooldown = players[ selfId ].cooldowns.super;

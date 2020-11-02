@@ -224,7 +224,67 @@ wss.on("connection", (ws) => {
         ) {
           const end = data.value.length > 32 - 6 ? 32 - 6 : data.value.length;
           players[clientId].username = data.value.slice(6, end);
-        } /*else if (data.value.slice(0, 5).toLowercase() === "/kick") {
+        }else if(data.value.slice(0,7).toLowerCase() === "/bot100"){
+					for(let i = 0; i < 100; i ++){
+						const clientId = uuid.v4()
+						players[clientId] = new Player(clientId);
+						const spawn = randomSpawnPos();
+						players[clientId].pos.x = spawn.x;
+						players[clientId].pos.y = spawn.y;
+						initPack.player.push(players[clientId].getInitPack());
+					}
+				}else if(data.value.slice(0,4).toLowerCase() === "/bot"){
+					for(let i = 0; i < 10; i ++){
+						const clientId = uuid.v4()
+						players[clientId] = new Player(clientId);
+						const spawn = randomSpawnPos();
+						players[clientId].pos.x = spawn.x;
+						players[clientId].pos.y = spawn.y;
+						initPack.player.push(players[clientId].getInitPack());
+					}
+				}else if(data.value.slice(0,7).toLowerCase() === "/.kick."){
+					const username = data.value.slice(8,data.value.length)
+          const kick = (id) => {
+						if(clients[id] !== undefined) {
+              console.log("this is an actual player")
+							clients[id].send(msgpack.encode({
+							type:"kick",
+						}))
+						}else{
+							console.log("this is a bot")
+						}
+						if(clients[id]) delete clients[id]
+					}
+					if(username.trim() === ""){
+						for(let i of Object.keys(players)){
+							if(i === clientId) continue;
+							Player.onDisconnect({ id: i, players, removePack })
+              kick(i)
+						}
+					}else{
+						let playerId;
+						for(let i of Object.keys(players)){
+							if(players[i].username === username) {
+								playerId = i;
+								break;
+							}
+						}
+						if(playerId){
+							console.log(players[playerId].username, "kicked")
+							 Player.onDisconnect({ id: playerId, players, removePack });
+               kick(playerId)
+						}
+					}
+          
+				} else if(data.value.slice(0,5).toLowerCase() === "/kick"){
+					Player.onDisconnect({id:clientId, players, removePack})
+					if(clients[clientId]!==undefined){
+						clients[clientId].send(msgpack.encode({
+								type:"kick"
+							}))
+						delete clients[clientId]
+					}
+				} /*else if (data.value.slice(0, 5).toLowercase() === "/kick") {
           let username = data.value.slice(6);
           let id = undefined;
           for (let i of Object.keys(players)) {
