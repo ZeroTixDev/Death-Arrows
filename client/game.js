@@ -12,6 +12,7 @@ const menuDiv = document.querySelector( "#menuContainer" );
 const menuGame = document.querySelector( ".container nav" );
 const backButton = document.querySelector( ".back" );
 const nameSpan = document.querySelector( ".name" );
+const topSpan = document.querySelector(".container .bottom")
 const playerCircle = document.querySelector( ".circle" );
 const leaveHelp = document.querySelector( ".exit" )
 const helpButton = document.querySelector( ".help" )
@@ -30,6 +31,8 @@ const meter = new FPSMeter( mainDiv, {
 	smoothing: 5,
 	position: 'absolute'
 } )
+const platformColor = "hsl(192, 54%, 8%)"
+let roundTime = 0;
 const meterElement = document.querySelector( "#gameContainer div" )
 meterElement.style.position = "absolute"
 meterElement.style.left = "1411px"
@@ -83,7 +86,7 @@ let index;
 const menu = document.querySelector( ".menu" );
 const game = document.querySelector( ".game" );
 const play = document.querySelector( "a" );
-const platforms = [];
+let platforms = [];
 let rotLeft = false;
 let rotRight = false;
 ctx.textAlign = "center";
@@ -123,6 +126,7 @@ settings.addEventListener( "mouseup", ( event ) => {
 helpButton.addEventListener( "mouseup", ( event ) => {
 	event.preventDefault()
 	helpOverlay.style.display = "flex"
+	helpOverlay.scrollTop = 0;
 	notMove = true;
 } )
 leaveHelp.addEventListener( "mouseup", ( event ) => {
@@ -348,8 +352,8 @@ class Platform {
 		ctx.strokeStyle = "#212752";*/
 		/*ctx.fillStyle = "#455453";
 		ctx.strokeStyle = "#455453";*/
-		ctx.fillStyle = "#0d191c"
-		ctx.strokeStyle = "#0d191c"
+		ctx.fillStyle = platformColor;
+		ctx.strokeStyle = platformColor;
 		ctx.fillRect( x, y, this.width, this.height );
 		ctx.strokeRect( x, y, this.width, this.height );
 	}
@@ -493,22 +497,22 @@ class Player {
 			false
 		);
 		ctx.fill();
-		ctx.fillStyle = "#b8ad91";
+		ctx.fillStyle = "hsl(43, 44%, 65%)";
 		if ( this.place !== undefined ) {
 			if ( this.place === 1 ) {
-				ctx.fillStyle = "#e3b21e";
+				ctx.fillStyle = "hsl(45, 88%, 50%)";
 			} else if ( this.place === 2 ) {
-				ctx.fillStyle = "#857ca2";
+				ctx.fillStyle = "hsl(254, 34%, 56%)";
 			} else if ( this.place === 3 ) {
-				ctx.fillStyle = "#c40606";
+				ctx.fillStyle = "hsl(0, 100%, 40%)";
 			}
 			if ( this.id === selfId ) {
 				if ( this.place === 1 ) {
-					playerCircle.style.backgroundColor = "#e3b21e";
+					playerCircle.style.backgroundColor = "hsl(45, 88%, 50%)";
 				} else if ( this.place === 2 ) {
-					playerCircle.style.backgroundColor = "#857ca2";
+					playerCircle.style.backgroundColor = "hsl(254, 34%, 56%)";
 				} else if ( this.place === 3 ) {
-					playerCircle.style.backgroundColor = "#c40606";
+					playerCircle.style.backgroundColor = "hsl(0, 100%, 40%)";
 				}
 			}
 		}
@@ -545,7 +549,7 @@ class Player {
 						Math.random() * 25 -
 						12.5,
 						Math.random() * 3 + 1,
-						"0d191c", {
+						platformColor, {
 							x: ( Math.random() - 0.5 ) * ( Math.random() * 10 ),
 							y: ( Math.random() - 0.5 ) * ( Math.random() * 10 )
 						}
@@ -586,7 +590,7 @@ class Player {
 		ctx.lineWidth = 0.3;
 		ctx.font = "30px Verdana, Geneva, sans-serif";
 		if ( this.place !== undefined && this.place === 2 ) {
-			ctx.fillStyle = "#6a45d9";
+			ctx.fillStyle = "hsl(255, 96%, 56%)";
 		}
 		ctx.fillText( this.username, x, Math.round( y + this.radius * 2 ) );
 		// ctx.strokeStyle = "black";
@@ -654,6 +658,11 @@ ws.addEventListener( "message", ( datas ) => {
 		if ( msg.serverTick ) {
 			serverTick = msg.serverTick;
 		}
+		if(msg.time && msg.serverTime){
+			console.log(msg.time, msg.serverTime)
+			console.log("change",Date.now() - msg.serverTime)
+			roundTime = (msg.time + (Date.now() - msg.serverTime))/1000
+		}
 		if ( msg.arena ) {
 			arena = msg.arena;
 			/*let colorRange = [0, 60, 240];
@@ -670,6 +679,7 @@ ws.addEventListener( "message", ( datas ) => {
 		}
 		if ( msg.highscore ) {
 			highscore = msg.highscore;
+			topSpan.innerText = `${highscore.name} : ${highscore.score}`
 		}
 		if ( msg.datas.player.length > 0 ) {
 			for ( let data of msg.datas.player ) {
@@ -682,13 +692,17 @@ ws.addEventListener( "message", ( datas ) => {
 			}
 		}
 		if ( msg.datas.platforms ) {
+			platforms = []
 			for ( let platform of msg.datas.platforms ) {
 				new Platform( platform.x, platform.y, platform.w, platform.h );
 			}
 		}
 		if(selfId && players[selfId]) updateLeaderboard();
 	} else if ( msg.type === "update" ) {
-		if ( msg.highscore ) highscore = msg.highscore;
+		if ( msg.highscore ) {
+			highscore = msg.highscore;
+			topSpan.innerText = `${highscore.name} : ${highscore.score}`
+		}
 		if ( selfId ) {
 			for ( let data of msg.datas.player ) {
 				const player = players[ data.id ];
@@ -780,7 +794,9 @@ ws.addEventListener( "message", ( datas ) => {
 			const arrow = arrows[ id ];
 			if ( arrow ) {
 				if ( type === "player" && config.particles) {
-					for ( let i = 0; i < 300; i++ ) {
+					for ( let i = 0; i < 500; i++ ) {
+						const colors = [   '#E0E4CC', '#914000', '#ff1c1f','#ff1c1f','#ff1c1f','#ff1c1f','#ff1c1f','#ff1c1f','#ff1c1f','#ff1c1f','#ff1c1f','#ff1c1f','#ff1c1f','#ff1c1f','#ff1c1f', '#F9D423' ]
+						const color = colors[Math.floor(Math.random()*colors.length)]
 						particles.push(
 							new Particle(
 								arrow.states[ 1 ] !== undefined ?
@@ -789,16 +805,16 @@ ws.addEventListener( "message", ( datas ) => {
 								arrow.states[ 1 ] !== undefined ?
 								arrow.states[ 1 ].y :
 								arrow.states[ 0 ].y,
-								Math.random() * 6 + 1,
-								"red", {
-									x: ( Math.random() - 0.5 ) * ( Math.random() * 25 ),
-									y: ( Math.random() - 0.5 ) * ( Math.random() * 25 )
+								Math.random() * 4 + 1,
+								color, {
+									x: ( Math.random() - 0.5 ) * ( Math.random() * 700 ),
+									y: ( Math.random() - 0.5 ) * ( Math.random() * 700 )
 								}
 							)
 						);
 					}
 				} else if ( type === "wall" && config.particles) {
-					for ( let i = 0; i < 50; i++ ) {
+					for ( let i = 0; i < 30; i++ ) {
 						particles.push(
 							new Particle(
 								( arrow.states[ 1 ] !== undefined ?
@@ -811,8 +827,8 @@ ws.addEventListener( "message", ( datas ) => {
 									arrow.states[ 0 ].y ) +
 								Math.random() * 50 -
 								25,
-								Math.random() * 5 + 1,
-						"#0d191c", {
+								Math.random() * 3 + 1,
+						platformColor, {
 									x: ( Math.random() - 0.5 ) * ( Math.random() * 25 ),
 									y: ( Math.random() - 0.5 ) * ( Math.random() * 25 )
 								}
@@ -918,7 +934,7 @@ function drawMap() {
 	// ctx.fillStyle = "rgb(200, 200, 200)";
 	// ctx.fillStyle = "#5a5e63";
 //	ctx.fillStyle = "#bcd1d0";
-		ctx.fillStyle = '#c3c7d6'
+		ctx.fillStyle = 'rgb(220, 220, 220)'
 	//arena color
 	ctx.fillRect( x, y, arena.x, arena.y );
 	/* const sizeX = arena.x / 2;
@@ -934,6 +950,7 @@ function drawMap() {
 let lastTime = 0;
 let initial = 0;
 let currentTime = 0;
+let lastHighscoreString = ""
 function render( time ) {
 	afr = window.requestAnimationFrame( render );
 	meter.tickStart()
@@ -963,6 +980,10 @@ function render( time ) {
 	  
 	  time += delta;
 	}*/
+	roundTime+=delta;
+	if(roundTime >= 20){
+		roundTime = 0;
+	}
 
 	if ( enterPressed && !chatlock ) {
 		notMove = !notMove;
@@ -987,7 +1008,7 @@ function render( time ) {
 	}
 	//i see what ur doing no rainbow!!!
 	//ctx.fillStyle = `rgb(35,35,35)`;
-	ctx.fillStyle = "#304347";
+	ctx.fillStyle = "hsl(190, 30%, 30%)";
 	ctx.fillRect( 0, 0, canvas.width, canvas.height );
 
 	drawMap();
@@ -1006,8 +1027,20 @@ function render( time ) {
 			particle.update( delta );
 		}
 	}
-	ctx.fillStyle = "rgba(39, 55, 73, 0.68)";
+	ctx.fillStyle = "rgba(39, 55, 73, 0.8)";
 	ctx.fillRect( 0, 696, 206, 206 );
+	for(let platform of platforms){
+		ctx.fillStyle = platformColor;
+			ctx.beginPath();
+			ctx.arc(
+				Math.round( 3 + ( (platform.x + platform.width/2 )/ arena.x ) * 200 ),
+				Math.round( 698 + ( (platform.y +  platform.height/2)/ arena.y ) * 200 ),
+				3,
+				0,
+				Math.PI * 2
+			);
+			ctx.fill();
+	}
 	// i put it at 5 pixels and moved this 5 pixels back and 10 pixels forward so
 	//it touch the actual side lmao
 	let playerCount = 0;
@@ -1017,7 +1050,8 @@ function render( time ) {
 		if ( i === selfId ) {
 			/* if (rotLeft) player.serverState.rot -= Math.PI * 0.3 * delta;
 			if (rotRight) player.serverState.rot += Math.PI * 0.3 * delta;*/
-			ctx.fillStyle = "#0f0d06";
+			if(!(3 + ( player.pos.x / arena.x ) * 200  > 206 ||  698 + ( player.pos.y / arena.y ) * 200 < 696)){
+			ctx.fillStyle = "black";
 			ctx.beginPath();
 			ctx.arc(
 				Math.round( 3 + ( player.pos.x / arena.x ) * 200 ),
@@ -1027,6 +1061,7 @@ function render( time ) {
 				Math.PI * 2
 			);
 			ctx.fill();
+			}
 			/*if(clientKeys[0]) player.serverState.y -= 2 * delta;
 			if(clientKeys[1]) player.serverState.y += 2 * delta;
 			if(clientKeys[2]) player.serverState.x -= 2 * delta;
@@ -1037,7 +1072,7 @@ function render( time ) {
 	for ( let i of Object.keys( arrows ) ) {
 		const arrow = arrows[ i ];
 
-		ctx.fillStyle = "#bdb7a8";
+		ctx.fillStyle = "hsl(43, 28%, 70%)";
 		if ( !players[ arrow.parent ] ) {
 			arrow.draw( delta );
 			continue;
@@ -1045,11 +1080,11 @@ function render( time ) {
 		if ( players[ arrow.parent ].place !== undefined ) {
 			const place = players[ arrow.parent ].place;
 			if ( place === 1 ) {
-				ctx.fillStyle = "#dec27a";
+				ctx.fillStyle = "hsl(43, 90%, 67%)";
 			} else if ( place === 2 ) {
-				ctx.fillStyle = "#91aebf";
+				ctx.fillStyle = "hsl(202, 52%, 66%)";
 			} else if ( place === 3 ) {
-				ctx.fillStyle = "#cc7878";
+				ctx.fillStyle = "rgb(254, 81, 81)";
 			}
 		}
 		arrow.draw( delta );
@@ -1062,8 +1097,8 @@ function render( time ) {
 	ctx.fillRect(1600 / 2 - 50, 0, 100, 60);
 	ctx.fillStyle = "black";
 	ctx.fillText(Math.round(time / 1000), 1600 / 2, 40);*/
-	ctx.fillStyle = "rgba(39, 55, 73, 0.68)";
-	ctx.fillRect( 1275, 50, 275, lbPlayers.length * 40 + 15 + 80 );
+	ctx.fillStyle = "rgba(22, 54, 90, 0.68)";
+	ctx.fillRect( 1275, 50, 300, lbPlayers.length * 40 + 15 + 80 );
 	//lbPlayers.sort((a, b) => b.kills - a.kills);
 	lbPlayers = lbPlayers.slice( 0, 4 );
 	ctx.font = "30px Verdana, Geneva, sans-serif";
@@ -1093,29 +1128,35 @@ function render( time ) {
 	}
 	ctx.font = "25px Verdana, Geneva, sans-serif";
 	ctx.fillStyle = "white";
-	ctx.fillText( `Players Online: ${playerCount}`, 1275 + 275/2, 90 );
+	ctx.fillText( `Players Online: ${playerCount}`, 1275 + 300/2, 90 );
 	ctx.strokeStyle = "rgb(0, 0, 0)";
 	ctx.lineWidth = 2;
 	ctx.beginPath();
 	ctx.moveTo( 1275, 110 );
-	ctx.lineTo( 1550, 110 );
+	ctx.lineTo( 1575, 110 );
 	ctx.stroke();
 	ctx.lineWidth = 1;
 	const superCooldown = players[ selfId ].cooldowns.super;
-	ctx.fillStyle = superCooldown.current <= 0 ? "#c9740a" : "#4f52d6";
+	ctx.fillStyle = superCooldown.current <= 0 ? "rgb(240, 132, 0)" : "rgb(44, 48, 246)";
 	ctx.fillRect( canvas.width / 2 - 100, canvas.height - 50, 200, 50 );
-	ctx.fillStyle = "rgba(6, 3, 6,0.6)";
+	ctx.fillStyle = "rgba(232, 3, 36,0.5)";
 	ctx.fillRect(
 		canvas.width / 2 - 100,
 		canvas.height,
 		200,
 		-50 * ( superCooldown.current / superCooldown.max )
 	);
-	ctx.fillStyle = 'rgba(245, 66, 126,0.6)'
-	ctx.fillRect( 0, 50, 350, 40 )
-	ctx.fillStyle = "white"
-	ctx.fillText( `${highscore.name} : ${highscore.score}`, 350 / 2, 78 )
+	ctx.fillStyle ="black"
+	ctx.fillText(convert(roundTime),canvas.width/2,30)
 	meter.tick()
+}
+const convert = (seconds) => {
+  let minutes = Math.floor(seconds/60);
+  seconds = Math.round(seconds - minutes * 60)
+  if (seconds < 10){
+    seconds = "0"+seconds; 
+  }
+  return String(minutes)+":"+String(seconds);
 }
 
 function lerp( start, end, time ) {

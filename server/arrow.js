@@ -22,20 +22,49 @@ module.exports = class Arrow {
     }
     return initPacks;
   }
-  static pack({ arrows, removePack, platforms, currentTime }) {
+  static pack({ arrows, removePack, platforms, currentTime ,db, players, highscore,collideCircleWithRotatedRectangle,randomSpawnPos}) {
     let pack = [];
 		let copy = currentTime
     for (let i of Object.keys(arrows)) {
 			copy = currentTime
+			let deleted = false;
       while(copy > 1/60) {
 				copy -= 1/60
+				if(arrows[i]){
         arrows[i].update(platforms, 1/60);
+				for (let j of Object.keys(players)) {
+				const player = players[j];
+				if (
+					collideCircleWithRotatedRectangle(player, arrows[i]) &&
+					arrows[i].parent !== players[j].id &&
+					players[j].cooldowns.spawn.current <= 0
+				) {
+					players[j].pos = randomSpawnPos();
+					players[j].cooldowns.spawn.current = players[j].cooldowns.spawn.max;
+					if (players[arrows[i].parent]) {
+						players[arrows[i].parent].kills++;
+						if(players[arrows[i].parent].kills > highscore.score){
+							(async ()=>{
+								highscore = {name:players[arrows[i].parent].username, score:players[arrows[i].parent].kills}
+								await db.set("highscore",highscore)
+								console.log(highscore)
+							})()
+						}
+					}
+					removePack.arrow.push({ id: arrows[i].id, type: "player" });
+					delete arrows[i];
+					deleted = true;
+					break;
+				}
+	
+		}
 			}
-      if (arrows[i].dead) {
+			}
+      if (arrows[i] && arrows[i].dead && !deleted) {
         removePack.arrow.push({ id: arrows[i].id, type: "wall" });
         delete arrows[i];
         // Arrow.onDisconnect({ id: i, arrows, removePack });
-      } else {
+      } else if(arrows[i] && !deleted){
         pack.push(arrows[i].getUpdatePack());
       }
     }

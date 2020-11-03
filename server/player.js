@@ -250,10 +250,6 @@ module.exports = class Player {
     }else{
 			this.vel.x*=Math.pow(0.89,delta*16)
 		}
-    if (this.pos.x - this.radius < 0) this.pos.x = this.radius;
-    if (this.pos.x + this.radius > arena.x) this.pos.x = arena.x - this.radius;
-    if (this.pos.y - this.radius < 0) this.pos.y = this.radius;
-    if (this.pos.y + this.radius > arena.y) this.pos.y = arena.y - this.radius;
     this.chatTime -= delta;
     if (this.arrowState) {
       if (this.arrowForce < this.maxForce) this.arrowForce += 100 * delta; //5
@@ -268,6 +264,10 @@ module.exports = class Player {
     this.hitWall = false;
     this.pendingKeys = [false, false, false, false];
     this.pendingRotate = [false, false];
+		if (this.pos.x - this.radius < -100) this.pos.x = this.radius - 100
+    if (this.pos.x + this.radius > arena.x + 100) this.pos.x = arena.x - this.radius +100
+    if (this.pos.y - this.radius < -100) this.pos.y = this.radius - 100
+    if (this.pos.y + this.radius > arena.y + 100) this.pos.y = arena.y - this.radius + 100
     for (let platform of platforms) {
       let rectHalfSizeX = platform.w / 2;
       let rectHalfSizeY = platform.h / 2;
