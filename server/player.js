@@ -264,10 +264,10 @@ module.exports = class Player {
     this.hitWall = false;
     this.pendingKeys = [false, false, false, false];
     this.pendingRotate = [false, false];
-		if (this.pos.x - this.radius < -100) this.pos.x = this.radius - 100
-    if (this.pos.x + this.radius > arena.x + 100) this.pos.x = arena.x - this.radius +100
-    if (this.pos.y - this.radius < -100) this.pos.y = this.radius - 100
-    if (this.pos.y + this.radius > arena.y + 100) this.pos.y = arena.y - this.radius + 100
+		 if (this.pos.x - this.radius < 0) this.pos.x += (this.radius-this.pos.x)/(delta*200)
+    if (this.pos.x + this.radius > arena.x + 0) this.pos.x += (arena.x - this.radius + 0-this.pos.x)/(delta*200)
+    if (this.pos.y - this.radius < 0) this.pos.y += (this.radius - 0 - this.pos.y)/(delta*200)
+    if (this.pos.y + this.radius > arena.y + 0) this.pos.y += (arena.y - this.radius + 0-this.pos.y)/(delta*200)
     for (let platform of platforms) {
       let rectHalfSizeX = platform.w / 2;
       let rectHalfSizeY = platform.h / 2;

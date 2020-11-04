@@ -19,6 +19,7 @@ const helpButton = document.querySelector( ".help" )
 const overlay = document.querySelector( ".overlay" );
 const helpOverlay = document.querySelector( "#helpOverlay" )
 const settings = document.querySelector( ".settings" );
+const mapTitle = document.querySelector(".mapTitle")
 const interpolateButton = document.getElementById( "interpolation" );
 const particleButton = document.getElementById( "particles" );
 const saveButton = document.getElementById( "saveButton" );
@@ -33,6 +34,7 @@ const meter = new FPSMeter( mainDiv, {
 } )
 const platformColor = "hsl(192, 54%, 8%)"
 let roundTime = 0;
+let roundSeconds = 0;
 const meterElement = document.querySelector( "#gameContainer div" )
 meterElement.style.position = "absolute"
 meterElement.style.left = "1411px"
@@ -655,13 +657,19 @@ ws.addEventListener( "message", ( datas ) => {
 		if ( msg.selfId ) {
 			selfId = msg.selfId;
 		}
+		if(msg.roundTime){
+			roundSeconds = msg.roundTime
+		}
 		if ( msg.serverTick ) {
 			serverTick = msg.serverTick;
 		}
 		if(msg.time && msg.serverTime){
 			console.log(msg.time, msg.serverTime)
 			console.log("change",Date.now() - msg.serverTime)
-			roundTime = (msg.time + (Date.now() - msg.serverTime))/1000
+			 roundTime = roundSeconds - (msg.time /*+ (Date.now() - msg.serverTime)*/)/1000 
+		}
+		if(msg.mapTitle){
+			mapTitle.innerText = msg.mapTitle;
 		}
 		if ( msg.arena ) {
 			arena = msg.arena;
@@ -681,17 +689,18 @@ ws.addEventListener( "message", ( datas ) => {
 			highscore = msg.highscore;
 			topSpan.innerText = `${highscore.name} : ${highscore.score}`
 		}
-		if ( msg.datas.player.length > 0 ) {
+		if ( msg.datas.player && msg.datas.player.length > 0 ) {
 			for ( let data of msg.datas.player ) {
 				new Player( data );
 			}
 		}
-		if ( msg.datas.arrow.length > 0 ) {
+		if ( msg.datas.arrow && msg.datas.arrow.length > 0 ) {
 			for ( let data of msg.datas.arrow ) {
 				new Arrow( data );
 			}
 		}
 		if ( msg.datas.platforms ) {
+			console.log("map change")
 			platforms = []
 			for ( let platform of msg.datas.platforms ) {
 				new Platform( platform.x, platform.y, platform.w, platform.h );
@@ -702,6 +711,9 @@ ws.addEventListener( "message", ( datas ) => {
 		if ( msg.highscore ) {
 			highscore = msg.highscore;
 			topSpan.innerText = `${highscore.name} : ${highscore.score}`
+		}
+		if(msg.time){
+			roundTime = roundSeconds - (msg.time/1000)
 		}
 		if ( selfId ) {
 			for ( let data of msg.datas.player ) {
@@ -981,8 +993,8 @@ function render( time ) {
 	  time += delta;
 	}*/
 	roundTime+=delta;
-	if(roundTime >= 20){
-		roundTime = 0;
+	if(roundTime <= 0){
+		roundTime = roundSeconds;
 	}
 
 	if ( enterPressed && !chatlock ) {

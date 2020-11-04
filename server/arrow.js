@@ -22,9 +22,10 @@ module.exports = class Arrow {
     }
     return initPacks;
   }
-  static pack({ arrows, removePack, platforms, currentTime ,db, players, highscore,collideCircleWithRotatedRectangle,randomSpawnPos}) {
+  static pack({ arrows, removePack, platforms, currentTime ,db, players,collideCircleWithRotatedRectangle,randomSpawnPos}) {
     let pack = [];
 		let copy = currentTime
+		let highscore = {name:"zero",score:0}
     for (let i of Object.keys(arrows)) {
 			copy = currentTime
 			let deleted = false;
@@ -44,11 +45,7 @@ module.exports = class Arrow {
 					if (players[arrows[i].parent]) {
 						players[arrows[i].parent].kills++;
 						if(players[arrows[i].parent].kills > highscore.score){
-							(async ()=>{
 								highscore = {name:players[arrows[i].parent].username, score:players[arrows[i].parent].kills}
-								await db.set("highscore",highscore)
-								console.log(highscore)
-							})()
 						}
 					}
 					removePack.arrow.push({ id: arrows[i].id, type: "player" });
@@ -68,7 +65,7 @@ module.exports = class Arrow {
         pack.push(arrows[i].getUpdatePack());
       }
     }
-    return pack;
+    return {pack,highscore}
   }
   getUpdatePack() {
     return {
