@@ -1,4 +1,4 @@
-let ws = new WebSocket( "wss://arrows.zerotixdev.repl.co" );
+let ws = new WebSocket(location.origin.replace(/^http/, 'ws'));
 ws.binaryType = "arraybuffer";
 let players = Object.create( null );
 let arrows = Object.create( null );

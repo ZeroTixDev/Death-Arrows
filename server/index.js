@@ -5,13 +5,13 @@ const path = require("path");
 const msgpack = require("msgpack-lite");
 const app = express();
 const wss = new WebSocket.Server({ noServer: true });
-const server = app.listen(4000, ()=> console.log("Server running at port 4000"));
+const server = app.listen(process.env.PORT || 4000, ()=> console.log("Server running at port 4000"));
 const Platform = require("./platform");
 const Player = require("./player");
 const Arrow = require("./arrow");
 const Vector = require("./vector");
-const Database  = require("@replit/database")
-const db = new Database()
+//const Database  = require("@replit/database")
+//const db = new Database()
 app.use(express.static("client"));
 const clients = {};
 const players = {};
@@ -34,14 +34,14 @@ let lastTime = Date.now();
 let width;
 let height;
 let spawns = [];
-let size; 
+let size;
 let roundTimeMax = 90;
 let roundTime = 0;
 let currentTime = 0;
 let highscore = {name:"muda",score:0};
 
 (async ()=>{
-	highscore = (await db.get("highscore"))
+//	highscore = (await db.get("highscore"))
 })()
 let platformsChanged = false;
 function changeMap(number){
@@ -108,11 +108,11 @@ function updateGameState(clients, players) {
 	}
 	//currentTime, players, arrows, collision_function, db, highscore, removePack
   let pack = Player.pack({ players, arena, platforms, currentTime});
-  let arrowPackages = Arrow.pack({ arrows, removePack, platforms, currentTime ,db, players ,collideCircleWithRotatedRectangle, randomSpawnPos})
+  let arrowPackages = Arrow.pack({ arrows, removePack, platforms, currentTime ,/*db */ players ,collideCircleWithRotatedRectangle, randomSpawnPos})
 	let arrowPack = arrowPackages.pack;
 	if(arrowPackages.highscore.score > highscore.score){
 		highscore = arrowPackages.highscore;
-		db.set("highscore",highscore)
+		//db.set("highscore",highscore)
 	}
 	Player.collision({ playerArray: Object.entries({ ...players }), players });
 	//highscore = newHighscore
