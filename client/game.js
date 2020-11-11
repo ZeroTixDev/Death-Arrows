@@ -23,6 +23,8 @@ const mapTitle = document.querySelector(".mapTitle")
 const interpolateButton = document.getElementById( "interpolation" );
 const particleButton = document.getElementById( "particles" );
 const saveButton = document.getElementById( "saveButton" );
+let platformMiniSize = 3;
+let ping = 0;
 const meter = new FPSMeter( mainDiv, {
 	theme: "colorful",
 	heat: 1,
@@ -194,6 +196,9 @@ function switchMenu() {
 				menuGame.style.zIndex = "-1";
 			}
 		} );
+		setInterval(()=>{
+			ws.send(JSON.stringify({type:"ping",ts:Date.now()}))
+		},300)
 	};
 	try {
 		init();
@@ -650,9 +655,11 @@ function resize() {
 resize();
 window.addEventListener( "resize", resize );
 afr = window.requestAnimationFrame( render );
+let messages = 0;
 ws.addEventListener( "message", ( datas ) => {
 	const msg = msgpack.decode( new Uint8Array( datas.data ) );
 	byteLength = datas.data.byteLength;
+	messages++;
 	if ( msg.type === "init" ) {
 		if ( msg.selfId ) {
 			selfId = msg.selfId;
@@ -662,6 +669,9 @@ ws.addEventListener( "message", ( datas ) => {
 		}
 		if ( msg.serverTick ) {
 			serverTick = msg.serverTick;
+		}
+		if(msg.platformSize){
+			platformMiniSize = msg.platformSize;
 		}
 		if(msg.time && msg.serverTime){
 			console.log(msg.time, msg.serverTime)
@@ -864,6 +874,8 @@ ws.addEventListener( "message", ( datas ) => {
 					canvas.width / 2,
 					canvas.height / 2
 				);
+	}else if(msg.type === "ping"){
+		ping = Math.round((Date.now() - msg.ts)/2)
 	}
 } );
 
@@ -992,10 +1004,10 @@ function render( time ) {
 	  
 	  time += delta;
 	}*/
-	roundTime+=delta;
+	/*roundTime+=delta;
 	if(roundTime <= 0){
 		roundTime = roundSeconds;
-	}
+	}*/
 
 	if ( enterPressed && !chatlock ) {
 		notMove = !notMove;
@@ -1045,9 +1057,9 @@ function render( time ) {
 		ctx.fillStyle = platformColor;
 			ctx.beginPath();
 			ctx.arc(
-				Math.round( 3 + ( (platform.x + platform.width/2 )/ arena.x ) * 200 ),
-				Math.round( 698 + ( (platform.y +  platform.height/2)/ arena.y ) * 200 ),
-				3,
+				Math.round( platformMiniSize + ( (platform.x + platform.width/2 )/ arena.x ) * 200 ),
+				Math.round( 700-platformMiniSize + ( (platform.y +  platform.height/2)/ arena.y ) * 200 ),
+				platformMiniSize,
 				0,
 				Math.PI * 2
 			);
@@ -1103,7 +1115,7 @@ function render( time ) {
 	}
 	ctx.fillStyle = "black";
 	ctx.font = "20px Verdana, Geneva, sans-serif";
-	ctx.fillText( byteLength + " bytes", 1530, 880 );
+	ctx.fillText( "Ping: "+ping + "ms", 80, 80 );
 	ctx.font = "40px Verdana, Geneva, sans-serif";
 	/*ctx.fillStyle = "red";
 	ctx.fillRect(1600 / 2 - 50, 0, 100, 60);

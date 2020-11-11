@@ -20,8 +20,9 @@ let platforms = [];
 const initPack = { player: [], arrow: [] };
 const removePack = { player: [], arrow: [] };
 let arena = new Vector(3000, 3000);
-const mapSizes = [3000,2500,2000,2000]
-const mapTitles = ["Just fight","Battlefield","Open Arena","Baguette"]
+const mapSizes = [3000,2500,2000,2000,3500]
+const platformSizes = [3,2,2,2,2]
+const mapTitles = ["Just fight","Battlefield","Open Arena","Swirl","Prison"]
 const serverTick = 40;
 app.get("/", (_, res) => res.sendFile("client/index.html"));
 server.on('upgrade', (request, socket, head) => {
@@ -44,7 +45,6 @@ let highscore = {name:"muda",score:0};
 })()
 let platformsChanged = false;
 function changeMap(number){
-	try {
 		platforms = []
 		spawns = []
 		arena = new Vector(mapSizes[number-1],mapSizes[number-1])
@@ -68,10 +68,13 @@ function changeMap(number){
 				}
 			}
 		}
-				platformsChanged = true;
-	} catch (err) {
-		console.log(err);
-	}
+		for(let i of Object.keys(players)){
+			players[i].kills = 0;
+			const pos = randomSpawnPos()
+			if(pos) players[i].pos = pos;
+			players[i].cooldowns.spawn.current = players[i].cooldowns.spawn.max;
+		}
+		platformsChanged = true;
 }
 changeMap(1)
 function randomSpawnPos() {
@@ -83,6 +86,7 @@ function randomSpawnPos() {
   };
 }
 let number = 1;
+let mapChange; // {number:int}
 function updateGameState(clients, players) {
   const delta = (Date.now() - lastTime) / 1000;
   lastTime = Date.now();
@@ -90,16 +94,17 @@ function updateGameState(clients, players) {
 	roundTime += delta;
 	if(roundTime >= roundTimeMax){
 		roundTime = 0;
-		number += 1;
-		if(number ===  mapTitles.length + 1){
-			number = 1;
+		let lastNumber = number;
+		while(lastNumber===number  || number <=0 || number >=mapSizes.length+1){
+			number = Math.ceil(Math.random()*mapSizes.length) 
 		}
-		changeMap(number)
-		for(let i of Object.keys(players)){
-			players[i].kills = 0;
-			players[i].pos = randomSpawnPos();
-			players[i].cooldowns.spawn.current = players[i].cooldowns.spawn.max;
-		}
+		changeMap(number);
+	}
+	if(mapChange && mapChange.number){
+		roundTime = 0;
+		number = mapChange.number;
+		mapChange = null;
+		changeMap(number);
 	}
 	//currentTime, players, arrows, collision_function, db, highscore, removePack
   let pack = Player.pack({ players, arena, platforms, currentTime});
@@ -160,12 +165,14 @@ function updateGameState(clients, players) {
         );
       }
 			if(platformsChanged){
+				//console.log("title:",mapTitles[number-1],"size",platformSizes[number-1],"number",number)
 				clientSocket.send(
 					msgpack.encode({
 						type:'init',
 						datas:{platforms},
 						arena,
 						mapTitle:mapTitles[number-1],
+						platformSize:platformSizes[number-1],
 					})
 				)
 			}
@@ -181,6 +188,10 @@ function updateGameState(clients, players) {
           })
         );
       } else { */
+			if(clients[i].pinged){
+				clientSocket.send(msgpack.encode({type:'ping',ts:clients[i].pinged}))
+				delete clients[i].pinged;
+			}
 					clientSocket.send(
 						msgpack.encode({
 							type: "update",
@@ -207,10 +218,12 @@ function updateGameState(clients, players) {
 }
 wss.on("connection", (ws) => {
   const clientId = uuid.v4();
+	let joined = false;
   ws.on("message", (msg) => {
     try {
       const data = JSON.parse(msg);
       if (data.type === "join") {
+				if(!joined) {
         clients[clientId] = ws;
         players[clientId] = new Player(clientId);
         const spawn = randomSpawnPos();
@@ -230,11 +243,22 @@ wss.on("connection", (ws) => {
             },
 						highscore,
 						mapTitle:mapTitles[number-1],
+						platformSize:platformSizes[number-1],
             arena,
             serverTick,
 						roundTime:roundTimeMax,
           })
         );
+				joined = true;
+				}else{
+					Player.onDisconnect({id:clientId, players, removePack})
+					if(clients[clientId]!==undefined){
+						clients[clientId].send(msgpack.encode({
+								type:"kick"
+							}))
+						delete clients[clientId]
+					}
+				}
       } else if (data.type === "keyUpdate") {
         players[clientId].decodeKeys(data.keys);
         if (players[clientId].makeArrow) {
@@ -312,7 +336,16 @@ wss.on("connection", (ws) => {
 						}
 					}
           
-				} else if(data.value.slice(0,5).toLowerCase() === "/kick"){
+				} else if(data.value.slice(0,6).toLowerCase() === "/reset"){
+					roundTime = roundTimeMax;
+					roundTime+=1;
+				}else if(data.value.slice(0,4).toLowerCase() === "/map"){
+					const num = Number(data.value.slice(5))
+					number = num;
+					if(num && num>=1 && num <= mapSizes.length){
+						changeMap(num)
+					}
+				}else if(data.value.slice(0,5).toLowerCase() === "/kick"){
 					Player.onDisconnect({id:clientId, players, removePack})
 					if(clients[clientId]!==undefined){
 						clients[clientId].send(msgpack.encode({
@@ -355,7 +388,9 @@ wss.on("connection", (ws) => {
       } else if (data.type === "back") {
         delete clients[clientId];
         Player.onDisconnect({ id: clientId, players, removePack });
-      }
+      }else if(data.type === "ping"){
+				clients[clientId].pinged = data.ts
+			}
     } catch {}
   });
   ws.on("close", () => {

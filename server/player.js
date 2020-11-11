@@ -50,6 +50,7 @@ module.exports = class Player {
     this.keys = keys;
     this.vel = new Vector(0, 0);
     this.maxSpd = 375;
+		this.accel = 5000;
     this.radius = 25; //lol
     this.chatMsg = "Hello";
     this.chatTime = 5;
@@ -76,7 +77,7 @@ module.exports = class Player {
       randomVowel() +
       randomConso() +
       randomVowel();
-    this.friction = 0.65;
+    this.friction = 0.67;
     this.mass = 1;
     this.lastArrow = false;
     this.makeArrow = false;
@@ -225,10 +226,10 @@ module.exports = class Player {
     if (this.movementKeys[1] || this.pendingKeys[1]) this.vel.y += vel * delta;
     if (this.movementKeys[2] || this.pendingKeys[2]) this.vel.x -= vel * delta;
     if (this.movementKeys[3] || this.pendingKeys[3]) this.vel.x += vel * delta; */
-    if (this.movementKeys[0] || this.pendingKeys[0]) this.vel.y = -this.maxSpd;
-    if (this.movementKeys[1] || this.pendingKeys[1]) this.vel.y = this.maxSpd;
-    if (this.movementKeys[2] || this.pendingKeys[2]) this.vel.x = -this.maxSpd;
-    if (this.movementKeys[3] || this.pendingKeys[3]) this.vel.x = this.maxSpd;
+    if (this.movementKeys[0] || this.pendingKeys[0]) this.vel.y -= this.accel * delta
+    if (this.movementKeys[1] || this.pendingKeys[1]) this.vel.y += this.accel * delta
+    if (this.movementKeys[2] || this.pendingKeys[2]) this.vel.x -= this.accel * delta
+    if (this.movementKeys[3] || this.pendingKeys[3]) this.vel.x += this.accel * delta;
     if (this.vel.y > this.maxSpd) this.vel.y = this.maxSpd;
     if (this.vel.y < -this.maxSpd) this.vel.y = -this.maxSpd;
     if (this.vel.x > this.maxSpd) this.vel.x = this.maxSpd;
@@ -243,12 +244,12 @@ module.exports = class Player {
     if (!this.movementKeys[0] && !this.movementKeys[1]) {
       this.vel.y *= Math.pow(this.friction, delta * 15);
     }else{
-				this.vel.y*=Math.pow(0.89,delta*16)
+				this.vel.y*=Math.pow(0.9,delta*16)
 		}
     if (!this.movementKeys[2] && !this.movementKeys[3]) {
       this.vel.x *= Math.pow(this.friction, delta * 15);
     }else{
-			this.vel.x*=Math.pow(0.89,delta*16)
+			this.vel.x*=Math.pow(0.9,delta*16)
 		}
     this.chatTime -= delta;
     if (this.arrowState) {

@@ -40,7 +40,8 @@ module.exports = class Arrow {
 					arrows[i].parent !== players[j].id &&
 					players[j].cooldowns.spawn.current <= 0
 				) {
-					players[j].pos = randomSpawnPos();
+					const pos = randomSpawnPos()
+					if(pos) players[j].pos = pos;
 					players[j].cooldowns.spawn.current = players[j].cooldowns.spawn.max;
 					if (players[arrows[i].parent]) {
 						players[arrows[i].parent].kills++;
