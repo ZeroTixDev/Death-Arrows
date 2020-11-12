@@ -190,10 +190,6 @@ function updateGameState(clients, players) {
                 })
               );
             } else { */
-            if (clients[i].pinged) {
-                clientSocket.send(msgpack.encode({ type: 'ping', ts: clients[i].pinged }))
-                delete clients[i].pinged;
-            }
             clientSocket.send(
                 msgpack.encode({
                     type: "update",
@@ -414,7 +410,7 @@ wss.on("connection", (ws) => {
                 delete clients[clientId];
                 Player.onDisconnect({ id: clientId, players, removePack });
             } else if (data.type === "ping") {
-                clients[clientId].pinged = data.ts
+                clientSocket.send(msgpack.encode({ type: 'ping', ts: data.ts }))
             }
         } catch {}
     });
