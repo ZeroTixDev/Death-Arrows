@@ -10,8 +10,8 @@ const Platform = require("./platform");
 const Player = require("./player");
 const Arrow = require("./arrow");
 const Vector = require("./vector");
-//const Database  = require("@replit/database")
-//const db = new Database()
+/*const Database  = require("@replit/database")
+const db = new Database()*/
 app.use(express.static("client"));
 const clients = {};
 const players = {};
