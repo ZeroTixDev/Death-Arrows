@@ -34,7 +34,7 @@ const meter = new FPSMeter( mainDiv, {
 	smoothing: 5,
 	position: 'absolute'
 } )
-const platformColor = "hsl(192, 54%, 8%)"
+const platformColor = "hsl(192, 59%, 8%)"
 let roundTime = 0;
 let roundSeconds = 0;
 const meterElement = document.querySelector( "#gameContainer div" )
