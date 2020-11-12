@@ -1176,7 +1176,7 @@ function render(time) {
     );
     ctx.fillStyle = "black"
     ctx.fillText(convert(roundTime), canvas.width / 2, 30)
-    ctx.fillText(`{byteLength} bytes`, canvas.width - 60, canvas.height - 30)
+    ctx.fillText(`${byteLength} bytes`, canvas.width - 60, canvas.height - 30)
     meter.tick()
 }
 const convert = (seconds) => {
