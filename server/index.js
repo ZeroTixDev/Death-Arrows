@@ -378,7 +378,7 @@ wss.on("connection", (ws) => {
                         const spawn = randomSpawnPos();
                         players[id].pos.x = spawn.x;
                         players[id].pos.y = spawn.y;
-                        players[id].username = name ? name: players[id].username;s
+                        players[id].username = name !== false ? name: players[id].username;
                         initPack.player.push(players[id].getInitPack());
                     }
                   }else{
