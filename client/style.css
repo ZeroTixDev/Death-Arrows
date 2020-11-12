@@ -274,7 +274,7 @@ nav {
   border-bottom: 1px solid rgb(5, 7, 116);
   transition: all 0.05s linear;
   display: flex;
-		filter:saturate(125%);
+		filter:saturate(105%);
   justify-content: flex-end;
   align-items: baseline;
 }
@@ -290,11 +290,25 @@ nav {
 	transition:all 0.2s linear;
   /*border: 5px solid black;*/
 }
-.container .bottom {
+.container .byte {
   position: absolute;
   font-size: 1.3rem;
-		filter:saturate(125%);
+	filter:saturate(125%);
 	bottom:-5px;
+  right:70px;
+}
+.container .highscore {
+  position:absolute;
+  font-size:1.3rem;
+  filter:saturate(125%);
+  bottom:-5px;
+}
+.container .ping {
+  position:absolute;
+  font-size:1.2rem;
+  filter:saturate(125%);
+  top:-5px;
+  left:63px;
 }
 .container h1 {
   font-size: 1.9rem;

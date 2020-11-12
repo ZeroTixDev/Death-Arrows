@@ -12,7 +12,9 @@ const menuDiv = document.querySelector("#menuContainer");
 const menuGame = document.querySelector(".container nav");
 const backButton = document.querySelector(".back");
 const nameSpan = document.querySelector(".name");
-const topSpan = document.querySelector(".container .bottom")
+const byteSpan = document.querySelector(".container .byte")
+const pingSpan = document.querySelector(".container .ping");
+const highscoreSpan = document.querySelector(".container .highscore")
 const playerCircle = document.querySelector(".circle");
 const leaveHelp = document.querySelector(".exit")
 const helpButton = document.querySelector(".help")
@@ -22,6 +24,7 @@ const settings = document.querySelector(".settings");
 const mapTitle = document.querySelector(".mapTitle")
 const interpolateButton = document.getElementById("interpolation");
 const particleButton = document.getElementById("particles");
+const fpsButton = document.getElementById("fps");
 const saveButton = document.getElementById("saveButton");
 let platformMiniSize = 3;
 let ping = 10000;
@@ -50,6 +53,7 @@ if (localStorage.getItem("config") == null) {
         interp: true,
         particles: true,
         name: "",
+        fps:true,
     };
 } else {
     config = JSON.parse(localStorage.getItem("config"));
@@ -59,6 +63,9 @@ if (config.interp === undefined) {
 }
 if (config.particles === undefined) {
     config.particles = true;
+}
+if(config.fps === undefined){
+	config.fps = true;
 }
 if (config.name === undefined) {
     config.name = ""
@@ -71,6 +78,11 @@ if (!config.interp) {
 if (!config.particles) {
     particleButton.classList.remove("yes")
     particleButton.classList.add("no")
+}
+if(!config.fps){
+	fpsButton.classList.remove("yes")
+	fpsButton.classList.add("no")
+    meterElement.style.display = "none";
 }
 const images = {
     winter: new Image(),
@@ -111,6 +123,19 @@ interpolateButton.addEventListener("mouseup", (event) => {
         interpolateButton.classList.add("no");
     }
 });
+fpsButton.addEventListener("mouseup", (event) => {
+	event.preventDefault()
+	config.fps = !config.fps;
+	if(config.fps) {
+		fpsButton.classList.remove("no");
+		fpsButton.classList.add("yes");
+    	meterElement.style.display = "block";
+	} else {
+		fpsButton.classList.remove("yes");
+		fpsButton.classList.add("no");
+   	    meterElement.style.display = "none";
+	}
+})
 particleButton.addEventListener("mouseup", (event) => {
     event.preventDefault();
     config.particles = !config.particles;
@@ -696,7 +721,7 @@ ws.addEventListener("message", (datas) => {
         }
         if (msg.highscore) {
             highscore = msg.highscore;
-            topSpan.innerText = `${highscore.name} : ${highscore.score}`
+            highscoreSpan.innerText = `${highscore.name} : ${highscore.score}`
         }
         if (msg.datas.player && msg.datas.player.length > 0) {
             for (let data of msg.datas.player) {
@@ -718,9 +743,10 @@ ws.addEventListener("message", (datas) => {
         if (selfId && players[selfId]) updateLeaderboard();
     } else if (msg.type === "update") {
     	byteLength = datas.data.byteLength;
+    	byteSpan.innerText = `${byteLength} bytes`
         if (msg.highscore) {
             highscore = msg.highscore;
-            topSpan.innerText = `${highscore.name} : ${highscore.score}`
+            highscoreSpan.innerText = `${highscore.name} : ${highscore.score}`
         }
         if (msg.time) {
             roundTime = roundSeconds - (msg.time / 1000)
@@ -876,6 +902,7 @@ ws.addEventListener("message", (datas) => {
         );
     } else if (msg.type === "ping") {
         ping = Math.round((Date.now() - msg.ts) / 2)
+        pingSpan.innerText = `Ping: ${ping} ms`
     }
 });
 
@@ -978,7 +1005,7 @@ let lastHighscoreString = ""
 
 function render(time) {
     afr = window.requestAnimationFrame(render);
-    meter.tickStart()
+    if(config.fps) meter.tickStart()
     if (!selfId || !players[selfId]) {
         ctx.fillStyle = "white";
         ctx.font = "50px Arial";
@@ -1002,7 +1029,6 @@ function render(time) {
     lastTime = time;
     currentTime += delta;
     /*if (time < 60) {
-      
       time += delta;
     }*/
     /*roundTime+=delta;
@@ -1115,8 +1141,8 @@ function render(time) {
         arrow.draw(delta);
     }
     ctx.fillStyle = "black";
-    ctx.font = "20px Verdana, Geneva, sans-serif";
-    ctx.fillText("Ping: " + ping + "ms", 80, 80);
+   /* ctx.font = "20px Verdana, Geneva, sans-serif";
+    ctx.fillText("Ping: " + ping + "ms", 80, 80);*/
     ctx.font = "40px Verdana, Geneva, sans-serif";
     /*ctx.fillStyle = "red";
     ctx.fillRect(1600 / 2 - 50, 0, 100, 60);
@@ -1171,10 +1197,18 @@ function render(time) {
         200,
         -50 * (superCooldown.current / superCooldown.max)
     );
-    ctx.fillStyle = "black"
+    ctx.fillStyle="white"
+    ctx.beginPath()
+    ctx.moveTo(canvas.width/2-80,0)
+    ctx.lineTo(canvas.width/2-40,50)
+    ctx.lineTo(canvas.width/2+40,50)
+    ctx.lineTo(canvas.width/2+80,0)
+    ctx.fill()
+    ctx.closePath()
+    	ctx.fillStyle = "black"
     ctx.fillText(convert(roundTime), canvas.width / 2, 30)
-    ctx.fillText(`${byteLength} bytes`, canvas.width - 100, canvas.height - 30)
-    meter.tick()
+   // ctx.fillText(`${byteLength} bytes`, canvas.width - 100, canvas.height - 30)
+   if(config.fps) meter.tick()
 }
 const convert = (seconds) => {
     let minutes = Math.floor(seconds / 60);

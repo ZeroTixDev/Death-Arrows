@@ -254,6 +254,7 @@ wss.on("connection", (ws) => {
                             platformSize: platformSizes[number - 1],
                             arena,
                             serverTick,
+                            roundTime:roundTimeMax,
                         })
                     );
                     joined = true;
