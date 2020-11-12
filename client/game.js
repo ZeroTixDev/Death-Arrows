@@ -1198,12 +1198,15 @@ function render(time) {
         -50 * (superCooldown.current / superCooldown.max)
     );
     ctx.fillStyle="white"
+    ctx.strokeStyle="black"
+    ctx.lineWidth = 1;
     ctx.beginPath()
     ctx.moveTo(canvas.width/2-80,0)
     ctx.lineTo(canvas.width/2-40,50)
     ctx.lineTo(canvas.width/2+40,50)
     ctx.lineTo(canvas.width/2+80,0)
     ctx.fill()
+    ctx.stroke()
     ctx.closePath()
     	ctx.fillStyle = "black"
     ctx.fillText(convert(roundTime), canvas.width / 2, 30)
