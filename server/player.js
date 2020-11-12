@@ -55,18 +55,20 @@ module.exports = class Player {
     this.chatMsg = "Hello";
     this.chatTime = 5;
     this.arrowState = false;
+    this.sending_arrowState = false;
     this.kills = 0;
     this.pendingKeys = [false, false, false, false];
+    this.username_changed = false;
     this.rot = 0;
-    /* this.cooldown = 1.5; //seconds
-    //just test
-    this.currentCooldown = 1.5;*/
+    //previous
+    this.previous_hitWall = false;
+    this.previous_kills = 0;
     this.cooldowns = {
       arrow: new Cooldown(1, 1.5),
-      super: new Cooldown(5, 30), //No let me test, I wanna see how laggy it get
+      super: new Cooldown(5, 30),
       spawn: new Cooldown(3, 3)
     };
-    this.arrowForce = 10;
+    this.arrowForce = 0;
     this.maxForce = 300;
     this.username =
       randomConso().toUpperCase() +
@@ -120,7 +122,7 @@ module.exports = class Player {
         this.cooldowns.spawn.current = 0;
       }
       this.arrowState = false;
-    }
+      }
     if (keys[7] === true && this.cooldowns.super.current <= 0) {
       this.cooldowns.super.current = this.cooldowns.super.max;
       this.makeSuper = true;
@@ -154,19 +156,37 @@ module.exports = class Player {
     return pack;
   }
   getUpdatePack() {
-    return {
+    let object = {
       id: this.id,
-      pos: this.pos,
-      username: this.username,
-      chatTime: this.chatTime,
-      chatMsg: this.chatMsg,
-      rot: this.rot,
-      arrowState: this.arrowState,
-      arrowForce: this.arrowForce,
-      cooldowns: this.cooldowns,
-      kills: this.kills,
-      hitWall: this.hitWall
+      pos: new Vector(Math.round(this.pos.x),Math.round(this.pos.y)),
+      rot:Math.round(this.rot*100)/100,
     };
+    if(this.cooldowns.spawn.current > 0 || this.cooldowns.super.current > 0 || this.cooldowns.arrow.current > 0) {
+      object.cooldowns = this.cooldowns;
+    }
+    if(this.username_changed){
+      this.username_changed = false;
+      object.username = this.username;
+    }
+    if(this.arrowForce > 1 || this.arrowState != this.sending_arrowState) {
+      object.arrowState = this.arrowState;
+      this.sending_arrowState = this.arrowState;
+    }
+    if(this.previous_hitWall !== this.hitWall) {
+      object.hitWall = this.hitWall;
+    }
+    if(this.arrowState){
+      object.arrowForce = Math.round(this.arrowForce);
+    }
+    if(this.previous_kills != this.kills){
+      this.previous_kills = this.kills;
+      object.kills = this.kills;
+    }
+    if(this.chatTime >= 0){
+      object.chatMsg = this.chatMsg;
+      object.chatTime = Math.round(this.chatTime)
+    }
+    return object;
   }
   static collision({ playerArray, players }) {
     for (let i = 0; i < playerArray.length; i++) {
@@ -202,14 +222,14 @@ module.exports = class Player {
   getInitPack() {
     return {
       id: this.id,
-      pos: this.pos,
+      pos: new Vector(Math.round(this.pos.x), Math.round(this.pos.y)),
       radius: this.radius,
       username: this.username,
-      chatTime: this.chatTime,
+      chatTime: Math.round(this.chatTime),
       chatMsg: this.chatMsg,
-      rot: this.rot,
+      rot: Math.round(this.rot*100)/100,
       arrowState: this.arrowState,
-      arrowForce: this.arrowForce,
+      arrowForce: Math.round(this.arrowForce),
       maxForce: this.maxForce,
       cooldowns: this.cooldowns,
       kills: this.kills,
@@ -222,6 +242,7 @@ module.exports = class Player {
   update(arena, platforms, delta) {
     //console.log(this.movementKeys);
     const vel = this.maxSpd * 40;
+    this.previous_hitWall = this.hitWall;
     /*if (this.movementKeys[0] || this.pendingKeys[0]) this.vel.y -= vel * delta;
     if (this.movementKeys[1] || this.pendingKeys[1]) this.vel.y += vel * delta;
     if (this.movementKeys[2] || this.pendingKeys[2]) this.vel.x -= vel * delta;
@@ -235,9 +256,9 @@ module.exports = class Player {
     if (this.vel.x > this.maxSpd) this.vel.x = this.maxSpd;
     if (this.vel.x < -this.maxSpd) this.vel.x = -this.maxSpd;
     if ((this.rotateKeys[0] || this.pendingRotate[0]) && this.arrowState)
-      this.rot -= Math.PI * delta;
+      this.rot -= Math.PI *1.2* delta;
     if ((this.rotateKeys[1] || this.pendingRotate[0]) && this.arrowState)
-      this.rot += Math.PI * delta;
+      this.rot += Math.PI * 1.2 * delta;
     for (let i of Object.keys(this.cooldowns)) {
       this.cooldowns[i].update(delta);
     }

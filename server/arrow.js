@@ -44,6 +44,7 @@ module.exports = class Arrow {
 					if(pos) players[j].pos = pos;
 					players[j].cooldowns.spawn.current = players[j].cooldowns.spawn.max;
 					if (players[arrows[i].parent]) {
+            players[arrows[i].parent].previous_kills = players[arrows[i].parent].kills;
 						players[arrows[i].parent].kills++;
 						if(players[arrows[i].parent].kills > highscore.score){
 								highscore = {name:players[arrows[i].parent].username, score:players[arrows[i].parent].kills}
@@ -54,7 +55,6 @@ module.exports = class Arrow {
 					deleted = true;
 					break;
 				}
-	
 		}
 			}
 			}
@@ -69,24 +69,26 @@ module.exports = class Arrow {
     return {pack,highscore}
   }
   getUpdatePack() {
-    return {
+    let object = {
       id: this.id,
-      x: this.x,
-      y: this.y,
-			angle:this.angle,
-			around:this.around,
+      x: Math.round(this.x),
+      y: Math.round(this.y),
     };
+    if(this.around){
+      object.angle = Math.round(this.angle*100)/100
+    }
+    return object;
   }
   getInitPack() {
     return {
       id: this.id,
-      x: this.x,
-      y: this.y,
+      x: Math.round(this.x),
+      y: Math.round(this.y),
       width: this.width,
       height: this.height,
-      life: this.life,
       angle: this.angle,
-      parent: this.parent
+      parent: this.parent,
+      around:this.around,
     };
   }
   update(platforms, delta) {

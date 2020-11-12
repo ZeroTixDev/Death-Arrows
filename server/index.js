@@ -70,6 +70,7 @@ function changeMap(number) {
         }
     }
     for (let i of Object.keys(players)) {
+        players[i].previous_kills = players[i].kills;
         players[i].kills = 0;
         const pos = randomSpawnPos()
         if (pos) players[i].pos = pos;
@@ -93,7 +94,9 @@ function updateGameState(clients, players) {
     const delta = (Date.now() - lastTime) / 1000;
     lastTime = Date.now();
     currentTime += delta;
+    let old_roundTime = roundTime;
     roundTime += delta;
+    let old_highscore = highscore;
     if (roundTime >= roundTimeMax) {
         roundTime = 0;
         let lastNumber = number;
@@ -167,7 +170,6 @@ function updateGameState(clients, players) {
                 );
             }
             if (platformsChanged) {
-                //console.log("title:",mapTitles[number-1],"size",platformSizes[number-1],"number",number)
                 clientSocket.send(
                     msgpack.encode({
                         type: 'init',
@@ -178,25 +180,19 @@ function updateGameState(clients, players) {
                     })
                 )
             }
-            /* if (nextRound) {
-              clientSocket.send(
-                msgpack.encode({
-                  type: "update",
-                  datas: {
-                    player: pack,
-                    arrow: arrowPack,
-                    time: { time }
-                  }
-                })
-              );
-            } else { */
+            let updateObject = {
+                type: "update",
+                datas: { player: pack, arrow: arrowPack },
+                //time: Math.round(roundTime * 1000),
+            }
+            if (old_highscore.score != highscore.score) {
+                updateObject.highscore = highscore;
+            }
+            if(Math.round(old_roundTime)!=Math.round(roundTime)){
+              updateObject.time = Math.round(roundTime * 1000)
+            }
             clientSocket.send(
-                msgpack.encode({
-                    type: "update",
-                    datas: { player: pack, arrow: arrowPack },
-                    highscore,
-                    time: roundTime * 1000,
-                })
+                msgpack.encode(updateObject)
             );
             if (removePack.player.length > 0 || removePack.arrow.length > 0) {
                 clientSocket.send(
@@ -214,8 +210,23 @@ function updateGameState(clients, players) {
     removePack.player = [];
     removePack.arrow = [];
 }
+const idLength = 3;
+
+function getId() {
+    let id = uuid.v4().slice(0, idLength);
+    let done = false;
+    while (!done) {
+        let hasId = false;
+        for (let i of Object.keys(players)) {
+            if (i === id) hasId = true;
+        }
+        done = !hasId;
+        if (!done) id = uuid.v4().slice(0, idLength);
+    }
+    return id;
+}
 wss.on("connection", (ws) => {
-    const clientId = uuid.v4();
+    const clientId = getId();
     let joined = false;
     ws.on("message", (msg) => {
         try {
@@ -231,8 +242,7 @@ wss.on("connection", (ws) => {
                     ws.send(
                         msgpack.encode({
                             type: "init",
-                            time: roundTime * 1000,
-                            serverTime: Date.now(),
+                            time: Math.round(roundTime * 1000),
                             selfId: clientId,
                             datas: {
                                 player: [...Player.getAllInitPack({ id: clientId, players })],
@@ -244,7 +254,6 @@ wss.on("connection", (ws) => {
                             platformSize: platformSizes[number - 1],
                             arena,
                             serverTick,
-                            roundTime: roundTimeMax,
                         })
                     );
                     joined = true;
@@ -262,16 +271,16 @@ wss.on("connection", (ws) => {
                 if (players[clientId].makeArrow) {
                     //make arrow
                     const player = players[clientId];
-                    const arrowId = uuid.v4();
+                    const arrowId = getId()
                     arrows[arrowId] = new Arrow(
                         player.pos.x + Math.sin(player.rot + Math.PI / 2) * 10,
                         player.pos.y - Math.cos(player.rot + Math.PI / 2) * 10,
                         player.rot + Math.PI / 2,
-                        player.arrowForce,
+                        player.arrowForce + 10,
                         arrowId,
                         clientId
                     );
-                    player.arrowForce = 10;
+                    player.arrowForce = 0;
                     initPack.arrow.push(arrows[arrowId].getInitPack());
                     players[clientId].makeArrow = false;
                 }
@@ -279,7 +288,7 @@ wss.on("connection", (ws) => {
                     const player = players[clientId];
                     for (let i = 0; i < 360; i += 20) {
                         const rot = i * (Math.PI / 180);
-                        const arrowId = uuid.v4();
+                        const arrowId = getId()
                         arrows[arrowId] = new Arrow(
                             player.pos.x + Math.sin(rot + Math.PI / 2) * 10,
                             player.pos.y - Math.cos(rot + Math.PI / 2) * 10,
@@ -300,6 +309,7 @@ wss.on("connection", (ws) => {
                 ) {
                     const end = data.value.length > 32 - 6 ? 32 - 6 : data.value.length;
                     players[clientId].username = data.value.slice(6, end);
+                    players[clientId].username_changed = true;
                 } else if (data.value.slice(0, 7).toLowerCase() === "/.kick.") {
                     const username = data.value.slice(8, data.value.length)
                     const kick = (id) => {
@@ -357,36 +367,37 @@ wss.on("connection", (ws) => {
                         }
                     }
                 } else if (data.value.slice(0, 4).toLowerCase() === "/bot") {
-                  const array = data.value.split(" ");
-                  if(array.length >= 2){
-                    let name = false;
-                    if(array.length === 3) {
-                      name = ""
-                      for(let i = 0; i < array.length; i++){
-                        if(i === 0 || i === 1) continue;
-                        name += array[i]
-                      }
+                    const array = data.value.split(" ");
+                    if (array.length >= 2) {
+                        let name = false;
+                        if (array.length === 3) {
+                            name = ""
+                            for (let i = 0; i < array.length; i++) {
+                                if (i === 0 || i === 1) continue;
+                                name += array[i]
+                            }
+                        }
+                        let iter = parseInt(array[1]) ? parseInt(array[1]) : 10;
+                        for (let i = 0; i < iter; i++) {
+                            const id = getId()
+                            players[id] = new Player(id);
+                            const spawn = randomSpawnPos();
+                            players[id].pos.x = spawn.x;
+                            players[id].pos.y = spawn.y;
+                            players[id].username = name !== false ? name : players[id].username;
+                            players[id].username_changed = true;
+                            initPack.player.push(players[id].getInitPack());
+                        }
+                    } else {
+                        for (let i = 0; i < 10; i++) {
+                            const id = getId()
+                            players[id] = new Player(id);
+                            const spawn = randomSpawnPos();
+                            players[id].pos.x = spawn.x;
+                            players[id].pos.y = spawn.y;
+                            initPack.player.push(players[id].getInitPack());
+                        }
                     }
-                    let iter = parseInt(array[1]) ? parseInt(array[1]) : 10;
-                    for(let i = 0; i < iter; i++){
-                        const id = uuid.v4()
-                        players[id] = new Player(id);
-                        const spawn = randomSpawnPos();
-                        players[id].pos.x = spawn.x;
-                        players[id].pos.y = spawn.y;
-                        players[id].username = name !== false ? name: players[id].username;
-                        initPack.player.push(players[id].getInitPack());
-                    }
-                  }else{
-                    for (let i = 0; i < 10; i++) {
-                        const id = uuid.v4()
-                        players[id] = new Player(id);
-                        const spawn = randomSpawnPos();
-                        players[id].pos.x = spawn.x;
-                        players[id].pos.y = spawn.y;
-                        initPack.player.push(players[id].getInitPack());
-                    }
-                  }
                 }
                 /*else if (data.value.slice(0, 5).toLowercase() === "/kick") {
                           let username = data.value.slice(6);
@@ -410,7 +421,7 @@ wss.on("connection", (ws) => {
                 delete clients[clientId];
                 Player.onDisconnect({ id: clientId, players, removePack });
             } else if (data.type === "ping") {
-                clientSocket.send(msgpack.encode({ type: 'ping', ts: data.ts }))
+                clients[clientId].send(msgpack.encode({ type: 'ping', ts: data.ts }))
             }
         } catch {}
     });

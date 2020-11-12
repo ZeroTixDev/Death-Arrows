@@ -24,7 +24,7 @@ const interpolateButton = document.getElementById("interpolation");
 const particleButton = document.getElementById("particles");
 const saveButton = document.getElementById("saveButton");
 let platformMiniSize = 3;
-let ping = 0;
+let ping = 10000;
 const meter = new FPSMeter(mainDiv, {
     theme: "colorful",
     heat: 1,
@@ -157,7 +157,6 @@ function showMenu(event) {
         menuGame.style.top = "41px";
         menuGame.style.visibility = "visible";
         menuGame.style.zIndex = "300";
-        console.log("up");
     } else {
         menuGame.style.visibility = "hidden";
         menuGame.style.top = "38px";
@@ -199,7 +198,8 @@ function switchMenu() {
         });
         setInterval(() => {
             ws.send(JSON.stringify({ type: "ping", ts: Date.now() }))
-        }, 300)
+        }, 200)
+
     };
     try {
         init();
@@ -256,7 +256,6 @@ class Arrow {
         this.x = initPack.x;
         this.y = initPack.y;
         this.angle = initPack.angle;
-        this.life = initPack.life;
         this.height = initPack.height;
         this.width = initPack.width;
         this.id = initPack.id;
@@ -661,7 +660,6 @@ afr = window.requestAnimationFrame(render);
 let messages = 0;
 ws.addEventListener("message", (datas) => {
     const msg = msgpack.decode(new Uint8Array(datas.data));
-    byteLength = datas.data.byteLength;
     messages++;
     if (msg.type === "init") {
         if (msg.selfId) {
@@ -677,8 +675,6 @@ ws.addEventListener("message", (datas) => {
             platformMiniSize = msg.platformSize;
         }
         if (msg.time && msg.serverTime) {
-            console.log(msg.time, msg.serverTime)
-            console.log("change", Date.now() - msg.serverTime)
             roundTime = roundSeconds - (msg.time /*+ (Date.now() - msg.serverTime)*/ ) / 1000
         }
         if (msg.mapTitle) {
@@ -721,6 +717,7 @@ ws.addEventListener("message", (datas) => {
         }
         if (selfId && players[selfId]) updateLeaderboard();
     } else if (msg.type === "update") {
+    	byteLength = datas.data.byteLength;
         if (msg.highscore) {
             highscore = msg.highscore;
             topSpan.innerText = `${highscore.name} : ${highscore.score}`
@@ -1176,7 +1173,7 @@ function render(time) {
     );
     ctx.fillStyle = "black"
     ctx.fillText(convert(roundTime), canvas.width / 2, 30)
-    ctx.fillText(`${byteLength} bytes`, canvas.width - 60, canvas.height - 30)
+    ctx.fillText(`${byteLength} bytes`, canvas.width - 100, canvas.height - 30)
     meter.tick()
 }
 const convert = (seconds) => {
