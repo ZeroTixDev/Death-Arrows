@@ -1,0 +1,20 @@
+{
+    "name": "arrows-server",
+    "main": "index.js",
+    "author": "ZeroTix",
+    "repository": {
+        "type" : "git",
+        "url" : "https://github.com/zerotixdev/Death-Arrows.git"
+    },
+    "private": true,
+    "license": "ISC",
+    "dependencies": {
+        "express": "^4.17.1",
+        "msgpack-lite": "^0.1.26",
+        "uuid": "^8.3.1",
+        "ws": "^7.4.0"
+    },
+    "engines": {
+        "node":"14.15.0"
+    }
+}
