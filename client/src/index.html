@@ -5,58 +5,53 @@
     <script src="./ulti/msgpack.min.js"></script>
     <script src="./ulti/meter.min.js"></script>
     <script src="game.js" defer></script>
-    <link href="style.css" rel="stylesheet"/>
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-JYLG1M40ZV"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <link href="style.css" rel="stylesheet" />
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JYLG1M40ZV"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
 
-  gtag('config', 'G-JYLG1M40ZV');
-</script>
+      gtag('config', 'G-JYLG1M40ZV');
+    </script>
     <!--<link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
       integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA=="
       crossorigin="anonymous"
     /> -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Nunito&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div class="menu">
       <!----<input type="text" class="username" placeholder="Username" /> --->
       <h1>Death Arrows</h1>
-      <a tabindex=1 href="#" class="play">Play</a>
+      <a tabindex="1" href="#" class="play">Play</a>
       <div class="container" id="menuContainer">
-        <a
-          href=" https://mini-project-11-map-editor.zerotixdev.repl.co/"
-          class="links"
-          >Map Editor</a
-        >
+        <a href=" https://mini-project-11-map-editor.zerotixdev.repl.co/" class="links">Map Editor</a>
       </div>
     </div>
-    <div class="game" style="display: none;">
+    <div class="game" style="display: none">
       <canvas id="canvas" width="1600" height="900"></canvas>
       <div class="container" id="gameContainer">
         <h1 class="mapTitle">Death Arrows</h1>
-        <nav style="visibility: none;">
+        <nav style="visibility: none">
           <span class="back"></span>
           <span class="settings"></span>
-					<span class="help"></span>
+          <span class="help"></span>
           <span class="name"></span>
           <span class="circle"></span>
         </nav>
         <!--<h1 class="bottom">pls insert ads ;c</h1> -->
         <h1 class="super">SUPER</h1>
-				<p class="byte"></p>
+        <p class="byte"></p>
         <p class="ping"></p>
         <p class="highscore"></p>
       </div>
-      <div id="chatHolder" style="display: none;">
+      <div id="chatHolder" style="display: none">
         <input
           id="chatBox"
           type="text"
@@ -67,7 +62,7 @@
           class="chat"
         />
       </div>
-      <form class="overlay" style="display: none;">
+      <form class="overlay" style="display: none">
         <!-- settings -->
         <div class="settingsContainer">
           <button id="saveButton">Save</button>
@@ -76,7 +71,7 @@
             <label for="interpolation" href="#">Interpolation</label>
             <button id="interpolation" class="yes"></button>
           </div>
-					<div>
+          <div>
             <label for="particles" href="#">Particles</label>
             <button id="particles" class="yes"></button>
           </div>
@@ -86,23 +81,26 @@
           </div>
         </div>
       </form>
-			<form class="overlay" id="helpOverlay" style="display:none;">
-				<div class="helpContainer">
-					<h1>Help</h1>
-					<div> WASD to Move </div>
-					<div> Z or SHIFT to Arrow </div>
-					<div> Space for super ability </div>
-					<div> Left and Right to change arrow direction </div>
-					<div> Enter to chat </div>
-					<div> Space for super </div>
-					<div> This game updates frequently so things will change fast </div>
-					<div> If you want to keep caught up, join our discord server <a target="blank" href="https://discord.gg/5HqmkPB">link</a></div>
-					<div> Kill as much people as you can with your powerful arrows and get on the all-time leaderboard </div>
-					<div> Click settings to change things like interpolation and particles </div>
-					<div> If you still have a question or two, or want to report a bug, click the link above </div>
-					<div class="exit">Ok, Thanks for the information.</div>
-				</div>
-			</form>
+      <form class="overlay" id="helpOverlay" style="display: none">
+        <div class="helpContainer">
+          <h1>Help</h1>
+          <div>WASD to Move</div>
+          <div>Z or SHIFT to Arrow</div>
+          <div>Space for super ability</div>
+          <div>Left and Right to change arrow direction</div>
+          <div>Enter to chat</div>
+          <div>Space for super</div>
+          <div>This game updates frequently so things will change fast</div>
+          <div>
+            If you want to keep caught up, join our discord server
+            <a target="blank" href="https://discord.gg/5HqmkPB">link</a>
+          </div>
+          <div>Kill as much people as you can with your powerful arrows and get on the all-time leaderboard</div>
+          <div>Click settings to change things like interpolation and particles</div>
+          <div>If you still have a question or two, or want to report a bug, click the link above</div>
+          <div class="exit">Ok, Thanks for the information.</div>
+        </div>
+      </form>
     </div>
   </body>
 </html>
