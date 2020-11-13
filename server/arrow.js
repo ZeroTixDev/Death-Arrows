@@ -29,7 +29,7 @@ module.exports = class Arrow {
     removePack,
     platforms,
     currentTime,
-    db,
+    database, // eslint-disable-line no-unused-vars
     players,
     collideCircleWithRotatedRectangle,
     randomSpawnPos,

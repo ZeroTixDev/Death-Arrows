@@ -233,7 +233,7 @@ module.exports = class Player {
   }
   update(arena, platforms, delta) {
     //console.log(this.movementKeys);
-    const vel = this.maxSpd * 40;
+    const vel = this.maxSpd * 40; // eslint-disable-line no-unused-vars
     this.previous_hitWall = this.hitWall;
     /*if (this.movementKeys[0] || this.pendingKeys[0]) this.vel.y -= vel * delta;
     if (this.movementKeys[1] || this.pendingKeys[1]) this.vel.y += vel * delta;

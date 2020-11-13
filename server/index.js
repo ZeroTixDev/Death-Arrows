@@ -89,7 +89,6 @@ function randomSpawnPos() {
 let number = 1;
 let mapChange; // {number:int}
 function updateGameState(clients, players) {
-  const updateRunTime = Date.now();
   const delta = (Date.now() - lastTime) / 1000;
   lastTime = Date.now();
   currentTime += delta;
@@ -162,7 +161,6 @@ function updateGameState(clients, players) {
   while (currentTime > 1 / 60) {
     currentTime -= 1 / 60;
   }
-  const nextRound = false;
   //console.log(time);
   //console.log(removePack);
   for (const i of Object.keys(clients)) {
@@ -459,7 +457,8 @@ wss.on('connection', (ws) => {
       } else if (data.type === 'ping') {
         clients[clientId].send(msgpack.encode({ type: 'ping', ts: data.ts }));
       }
-    } catch {
+    } catch (e) {
+      console.error(e);
     }
   });
   ws.on('close', () => {
