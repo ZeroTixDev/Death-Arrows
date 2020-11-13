@@ -91,6 +91,7 @@ function randomSpawnPos() {
 let number = 1;
 let mapChange; // {number:int}
 function updateGameState(clients, players) {
+    let updateRunTime = Date.now()
     const delta = (Date.now() - lastTime) / 1000;
     lastTime = Date.now();
     currentTime += delta;
@@ -347,7 +348,19 @@ wss.on("connection", (ws) => {
                 } else if (data.value.slice(0, 6).toLowerCase() === "/reset") {
                     roundTime = roundTimeMax;
                     roundTime += 1;
-                } else if (data.value.slice(0, 4).toLowerCase() === "/map") {
+                } else if(data.value.slice(0,5).toLowerCase() === "/sudo"){
+                    const array = data.value.split(' ')
+                    const name = array[1]
+                    const message = array[2]
+                    for(let i of Object.keys(players)){
+                      if(players[i].username === name){
+                        players[i].chatMsg = message;
+                        players[i].chatTime = 5;
+                        console.log(array)
+                        break;
+                      }
+                    }
+                }else if (data.value.slice(0, 4).toLowerCase() === "/map") {
                     const num = Number(data.value.slice(5))
                     number = num;
                     if (num && num >= 1 && num <= mapSizes.length) {
