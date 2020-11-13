@@ -34,6 +34,8 @@ const fpsButton = document.getElementById("fps");
 const saveButton = document.getElementById("saveButton");
 let platformMiniSize = 3;
 let ping = 10000;
+const detectPadding = 150;
+let blind = false;
 const meter = new FPSMeter(mainDiv, {
     theme: "colorful",
     heat: 1,
@@ -344,6 +346,10 @@ class Arrow {
             Math.round(this.x - players[selfId].pos.x + canvas.width / 2),
             Math.round(this.y - players[selfId].pos.y + canvas.height / 2)
         ];
+        if(x+this.width < -detectPadding || x > canvas.width + detectPadding || y > canvas.height + detectPadding || y + this.height < -detectPadding) {
+        	return;
+        }
+        arrowDraw++;
         //	if(this.around){
         const center = centerRect(this.x, this.y, this.width, this.height, this.angle)
         while (this.currentTime >= 0.009) {
@@ -377,6 +383,7 @@ class Arrow {
         ctx.restore();
     }
 }
+let platformsDraw = 0;
 class Platform {
     constructor(x, y, width, height) {
         this.x = x;
@@ -390,6 +397,10 @@ class Platform {
             Math.round(this.x - players[selfId].pos.x + canvas.width / 2),
             Math.round(this.y - players[selfId].pos.y + canvas.height / 2)
         ];
+        if(x+this.width < -detectPadding || x > canvas.width + detectPadding || y > canvas.height + detectPadding || y + this.height < -detectPadding) {
+        	return;
+        }
+        platformsDraw++;
         ctx.lineWidth = 3;
         /* ctx.fillStyle = `rgb(30,30,30)`;
         ctx.strokeStyle = `rgb(30,30,30)`;*/
@@ -428,7 +439,7 @@ function centerRect(x, y, w, h, radians) {
     let ry = distance * Math.sin(angle + radians) + a.y
     return { x: rx, y: ry }
 }
-
+let particleDraw = 0;
 class Particle {
     constructor(x, y, size, color, velocity) {
         this.x = x
@@ -440,13 +451,19 @@ class Particle {
         this.alpha = 1;
     }
     draw() {
-        ctx.save();
-        ctx.globalAlpha = this.alpha;
+        /*ctx.save();
+        ctx.globalAlpha = this.alpha;  ADD THIS LATER, THIS MAKES A SUPER COOL EFFECT */
         //ctx.beginPath();
         const [x, y] = [
             Math.round(this.x - players[selfId].pos.x + canvas.width / 2),
             Math.round(this.y - players[selfId].pos.y + canvas.height / 2)
         ];
+         if(x+this.size/2+this.size < -detectPadding || x + this.size/2> canvas.width + detectPadding || y+this.size/2 > canvas.height + detectPadding || y + this.size + this.size/2< -detectPadding) {
+        	return;
+        }
+        particleDraw++;
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
         ctx.fillStyle = this.color;
         ctx.fillRect(x + this.size / 2, y + this.size / 2, this.size, this.size);
         ctx.globalAlpha = 1;
@@ -463,6 +480,7 @@ class Particle {
 }
 let particles = [];
 let lastName = config.name;
+let playerDraw = 0;
 class Player {
     constructor(initPack) {
         this.pos = initPack.pos;
@@ -532,6 +550,10 @@ class Player {
             Math.round(this.pos.x - players[selfId].pos.x + canvas.width / 2),
             Math.round(this.pos.y - players[selfId].pos.y + canvas.height / 2)
         ];
+        if(x+this.radius < -detectPadding || x -this.radius> canvas.width + detectPadding|| y -this.radius> canvas.height + detectPadding || y + this.radius < -detectPadding) {
+        	return;
+        }
+        playerDraw++;
         ctx.fillStyle = "#a8a8a8";
         ctx.beginPath();
         ctx.arc(
@@ -916,6 +938,8 @@ ws.addEventListener("message", (datas) => {
     } else if (msg.type === "ping") {
         ping = Math.round((Date.now() - msg.ts) / 2)
         pingSpan.innerText = `Ping: ${ping} ms`
+    }else if(msg.type === "blind") {
+    	blind = true;
     }
 });
 
@@ -1015,7 +1039,7 @@ let lastTime = 0;
 let initial = 0;
 let currentTime = 0;
 let lastHighscoreString = ""
-
+let arrowDraw = 0;
 function render(time) {
     afr = window.requestAnimationFrame(render);
     if(config.fps) meter.tickStart()
@@ -1079,8 +1103,15 @@ function render(time) {
     /*for (let star of stars) {
       star.draw(delta);
     }*/
+    platformsDraw = 0;
     for (let platform of platforms) {
         platform.draw();
+    }
+   // console.log(`${platformsDraw} platforms on screen, ${platforms.length} total platforms`	)
+    particleDraw = 0;
+    if(blind) {
+    	ctx.save();
+        ctx.globalAlpha = 0.05;
     }
     for (let i = particles.length - 1; i >= 0; i--) {
         const particle = particles[i];
@@ -1091,6 +1122,7 @@ function render(time) {
             particle.update(delta);
         }
     }
+     //console.log(`${particleDraw} particles on screen, total particles ${particles.length}`)
     ctx.fillStyle = "rgba(39, 55, 73, 0.8)";
     ctx.fillRect(0, 696, 206, 206);
     for (let platform of platforms) {
@@ -1108,6 +1140,7 @@ function render(time) {
     // i put it at 5 pixels and moved this 5 pixels back and 10 pixels forward so
     //it touch the actual side lmao
     let playerCount = 0;
+    playerDraw = 0;
     for (let i of Object.keys(players)) {
         const player = players[i];
         playerCount++;
@@ -1133,9 +1166,12 @@ function render(time) {
         }
         player.draw(delta);
     }
+    //console.log(`${playerDraw} on screen, ${playerCount} total players`)
+    arrowDraw = 0;
+    let arrowCount = 0;
     for (let i of Object.keys(arrows)) {
         const arrow = arrows[i];
-
+        arrowCount++;
         ctx.fillStyle = "hsl(43, 28%, 70%)";
         if (!players[arrow.parent]) {
             arrow.draw(delta);
@@ -1153,6 +1189,7 @@ function render(time) {
         }
         arrow.draw(delta);
     }
+    //console.log(`${arrowDraw} arrow on screen, ${arrowCount} total arrows`)
     ctx.fillStyle = "black";
    /* ctx.font = "20px Verdana, Geneva, sans-serif";
     ctx.fillText("Ping: " + ping + "ms", 80, 80);*/

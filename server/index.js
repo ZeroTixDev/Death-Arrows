@@ -348,10 +348,22 @@ wss.on("connection", (ws) => {
                 } else if (players[clientId].dev && data.value.slice(0, 6).toLowerCase() === "/reset") {
                     roundTime = roundTimeMax;
                     roundTime += 1;
+                }  else if (players[clientId].dev && data.value.slice(0, 6).toLowerCase() === "/blind") {
+                    const username = data.value.slice(7,data.value.length);
+                    console.log(username)
+                    for(let i of Object.keys(players)){
+                      if(players[i].username === username) {
+                        if(clients[i]){
+                          clients[i].send(msgpack.encode({type:"blind"}))
+                        }
+                        break;
+                      }
+                    }
                 } else if(players[clientId].dev && data.value.slice(0,5).toLowerCase() === "/sudo"){
                     const array = data.value.split(' ')
                     const name = array[1]
-                    const message = array[2]
+                    let message = array.slice(2).join(' ')
+                    console.log(message)
                     for(let i of Object.keys(players)){
                       if(players[i].username === name){
                         players[i].chatMsg = message;
