@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = class Arrow {
   constructor(x, y, angle, speed, id, parent, around = false) {
     this.x = x;
@@ -5,9 +7,9 @@ module.exports = class Arrow {
     this.angle = angle;
     this.xv = Math.cos(this.angle) * (speed * 1) * 20;
     this.yv = Math.sin(this.angle) * (speed * 1) * 20;
-		this.speed = speed;
+    this.speed = speed;
     this.life = 3;
-		this.around = around;
+    this.around = around;
     this.height = 10 * 2;
     this.width = 23 * 2;
     this.dead = false;
@@ -16,66 +18,75 @@ module.exports = class Arrow {
   }
 
   static getAllInitPack({ arrows }) {
-    var initPacks = [];
-    for (let i of Object.keys(arrows)) {
+    const initPacks = [];
+    for (const i of Object.keys(arrows)) {
       initPacks.push(arrows[i].getInitPack());
     }
     return initPacks;
   }
-  static pack({ arrows, removePack, platforms, currentTime ,db, players,collideCircleWithRotatedRectangle,randomSpawnPos}) {
-    let pack = [];
-		let copy = currentTime
-		let highscore = {name:"zero",score:0}
-    for (let i of Object.keys(arrows)) {
-			copy = currentTime
-			let deleted = false;
-      while(copy > 1/60) {
-				copy -= 1/60
-				if(arrows[i]){
-        arrows[i].update(platforms, 1/60);
-				for (let j of Object.keys(players)) {
-				const player = players[j];
-				if (
-					collideCircleWithRotatedRectangle(player, arrows[i]) &&
-					arrows[i].parent !== players[j].id &&
-					players[j].cooldowns.spawn.current <= 0
-				) {
-					const pos = randomSpawnPos()
-					if(pos) players[j].pos = pos;
-					players[j].cooldowns.spawn.current = players[j].cooldowns.spawn.max;
-					if (players[arrows[i].parent]) {
-            players[arrows[i].parent].previous_kills = players[arrows[i].parent].kills;
-						players[arrows[i].parent].kills++;
-						if(players[arrows[i].parent].kills > highscore.score){
-								highscore = {name:players[arrows[i].parent].username, score:players[arrows[i].parent].kills}
-						}
-					}
-					removePack.arrow.push({ id: arrows[i].id, type: "player" });
-					delete arrows[i];
-					deleted = true;
-					break;
-				}
-		}
-			}
-			}
+  static pack({
+    arrows,
+    removePack,
+    platforms,
+    currentTime,
+    db,
+    players,
+    collideCircleWithRotatedRectangle,
+    randomSpawnPos,
+  }) {
+    const pack = [];
+    let copy = currentTime;
+    let highscore = { name: 'zero', score: 0 };
+    for (const i of Object.keys(arrows)) {
+      copy = currentTime;
+      let deleted = false;
+      while (copy > 1 / 60) {
+        copy -= 1 / 60;
+        if (arrows[i]) {
+          arrows[i].update(platforms, 1 / 60);
+          for (const j of Object.keys(players)) {
+            const player = players[j];
+            if (
+              collideCircleWithRotatedRectangle(player, arrows[i]) &&
+              arrows[i].parent !== players[j].id &&
+              players[j].cooldowns.spawn.current <= 0
+            ) {
+              const pos = randomSpawnPos();
+              if (pos) players[j].pos = pos;
+              players[j].cooldowns.spawn.current = players[j].cooldowns.spawn.max;
+              if (players[arrows[i].parent]) {
+                players[arrows[i].parent].previous_kills = players[arrows[i].parent].kills;
+                players[arrows[i].parent].kills++;
+                if (players[arrows[i].parent].kills > highscore.score) {
+                  highscore = { name: players[arrows[i].parent].username, score: players[arrows[i].parent].kills };
+                }
+              }
+              removePack.arrow.push({ id: arrows[i].id, type: 'player' });
+              delete arrows[i];
+              deleted = true;
+              break;
+            }
+          }
+        }
+      }
       if (arrows[i] && arrows[i].dead && !deleted) {
-        removePack.arrow.push({ id: arrows[i].id, type: "wall" });
+        removePack.arrow.push({ id: arrows[i].id, type: 'wall' });
         delete arrows[i];
         // Arrow.onDisconnect({ id: i, arrows, removePack });
-      } else if(arrows[i] && !deleted){
+      } else if (arrows[i] && !deleted) {
         pack.push(arrows[i].getUpdatePack());
       }
     }
-    return {pack,highscore}
+    return { pack, highscore };
   }
   getUpdatePack() {
-    let object = {
+    const object = {
       id: this.id,
       x: Math.round(this.x),
       y: Math.round(this.y),
     };
-    if(this.around){
-      object.angle = Math.round(this.angle*100)/100
+    if (this.around) {
+      object.angle = Math.round(this.angle * 100) / 100;
     }
     return object;
   }
@@ -88,17 +99,17 @@ module.exports = class Arrow {
       height: this.height,
       angle: this.angle,
       parent: this.parent,
-      around:this.around,
+      around: this.around,
     };
   }
   update(platforms, delta) {
     this.x += this.xv * delta;
     this.y += this.yv * delta;
-		if(this.around){
-			this.xv = Math.cos(this.angle) * this.speed * 20;
-			this.yv = Math.sin(this.angle) * this.speed * 20;
-			this.angle += Math.PI * 2* delta
-		}
+    if (this.around) {
+      this.xv = Math.cos(this.angle) * this.speed * 20;
+      this.yv = Math.sin(this.angle) * this.speed * 20;
+      this.angle += Math.PI * 2 * delta;
+    }
     this.life -= delta;
     if (this.life < 0) {
       this.dead = true;
@@ -114,24 +125,24 @@ module.exports = class Arrow {
   return c*x - s*y, s*x + c*y
   const [x,y] = [];
   */
-    let c = Math.cos(this.angle);
-    let s = Math.sin(this.angle);
+    const c = Math.cos(this.angle);
+    const s = Math.sin(this.angle);
     //const [x, y] = [c * this.x - s * this.y, s * this.x + c * this.y];
     // console.log(x - this.x);
-    for (let platform of platforms) {
+    for (const platform of platforms) {
       if (
         doPolygonsIntersect(
           [
             { x: this.x, y: this.y },
             { x: this.x + this.width * c, y: this.y },
             { x: this.x + this.width * c, y: this.y + this.height * s },
-            { x: this.x, y: this.y + s * this.height }
+            { x: this.x, y: this.y + s * this.height },
           ],
           [
             { x: platform.x, y: platform.y },
             { x: platform.x + platform.w, y: platform.y },
             { x: platform.x + platform.w, y: platform.y + platform.h },
-            { x: platform.x, y: platform.y + platform.h }
+            { x: platform.x, y: platform.y + platform.h },
           ]
         )
       ) {
@@ -149,21 +160,21 @@ module.exports = class Arrow {
 };
 
 function doPolygonsIntersect(a, b) {
-  var polygons = [a, b];
-  var minA, maxA, projected, i, i1, j, minB, maxB;
+  const polygons = [a, b];
+  let minA, maxA, projected, i, i1, j, minB, maxB;
 
   for (i = 0; i < polygons.length; i++) {
     // for each polygon, look at each edge of the polygon, and determine if it separates
     // the two shapes
-    var polygon = polygons[i];
+    const polygon = polygons[i];
     for (i1 = 0; i1 < polygon.length; i1++) {
       // grab 2 vertices to create an edge
-      var i2 = (i1 + 1) % polygon.length;
-      var p1 = polygon[i1];
-      var p2 = polygon[i2];
+      const i2 = (i1 + 1) % polygon.length;
+      const p1 = polygon[i1];
+      const p2 = polygon[i2];
 
       // find the line perpendicular to this edge
-      var normal = { x: p2.y - p1.y, y: p1.x - p2.x };
+      const normal = { x: p2.y - p1.y, y: p1.x - p2.x };
 
       minA = maxA = undefined;
       // for each vertex in the first shape, project it onto the line perpendicular to the edge
