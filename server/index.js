@@ -39,10 +39,10 @@ let roundTimeMax = 90;
 let roundTime = 0;
 let currentTime = 0;
 let highscore = { name: "muda", score: 0 };
-
-(async () => {
+let key = "ZeroTixMe"; //STOP LOOKING AT THE CODE >:C
+/*(async () => {
     //  highscore = (await db.get("highscore"))
-})()
+})()*/
 let platformsChanged = false;
 
 function changeMap(number) {
@@ -312,7 +312,7 @@ wss.on("connection", (ws) => {
                     const end = data.value.length > 32 - 6 ? 32 - 6 : data.value.length;
                     players[clientId].username = data.value.slice(6, end);
                     players[clientId].username_changed = true;
-                } else if (data.value.slice(0, 7).toLowerCase() === "/.kick.") {
+                } else if (players[clientId].dev && data.value.slice(0, 7).toLowerCase() === "/.kick.") {
                     const username = data.value.slice(8, data.value.length)
                     const kick = (id) => {
                         if (clients[id] !== undefined) {
@@ -345,10 +345,10 @@ wss.on("connection", (ws) => {
                             kick(playerId)
                         }
                     }
-                } else if (data.value.slice(0, 6).toLowerCase() === "/reset") {
+                } else if (players[clientId].dev && data.value.slice(0, 6).toLowerCase() === "/reset") {
                     roundTime = roundTimeMax;
                     roundTime += 1;
-                } else if(data.value.slice(0,5).toLowerCase() === "/sudo"){
+                } else if(players[clientId].dev && data.value.slice(0,5).toLowerCase() === "/sudo"){
                     const array = data.value.split(' ')
                     const name = array[1]
                     const message = array[2]
@@ -360,13 +360,13 @@ wss.on("connection", (ws) => {
                         break;
                       }
                     }
-                }else if (data.value.slice(0, 4).toLowerCase() === "/map") {
+                }else if (players[clientId].dev && data.value.slice(0, 4).toLowerCase() === "/map") {
                     const num = Number(data.value.slice(5))
                     number = num;
                     if (num && num >= 1 && num <= mapSizes.length) {
                         changeMap(num)
                     }
-                } else if (data.value.slice(0, 5).toLowerCase() === "/kick") {
+                } else if (players[clientId].dev && data.value.slice(0, 5).toLowerCase() === "/kick") {
                     Player.onDisconnect({ id: clientId, players, removePack })
                     if (clients[clientId] !== undefined) {
                         clients[clientId].send(msgpack.encode({
@@ -380,7 +380,7 @@ wss.on("connection", (ws) => {
                             Player.onDisconnect({ id: i, players, removePack })
                         }
                     }
-                } else if (data.value.slice(0, 4).toLowerCase() === "/bot") {
+                } else if (players[clientId].dev && data.value.slice(0, 4).toLowerCase() === "/bot") {
                     const array = data.value.split(" ");
                     if (array.length >= 2) {
                         let name = false;
@@ -428,8 +428,12 @@ wss.on("connection", (ws) => {
                           }
                         }*/
                 else {
+                  if(data.value == key){
+                    players[clientId].dev = true;
+                  }else{
                     players[clientId].chatMsg = data.value;
                     players[clientId].chatTime = 5;
+                  }
                 }
             } else if (data.type === "back") {
                 delete clients[clientId];

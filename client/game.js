@@ -111,6 +111,12 @@ const play = document.querySelector("a");
 let platforms = [];
 let rotLeft = false;
 let rotRight = false;
+let totalBytes = 0;
+setInterval(()=>{
+   	byteSpan.innerText = `Messages received: ${messages} / per second : ${totalBytes} bytes / per second`
+	totalBytes = 0;
+	messages = 0;
+},1000)
 ctx.textAlign = "center";
 saveButton.addEventListener("mouseup", (event) => {
     event.preventDefault();
@@ -229,7 +235,7 @@ function switchMenu() {
         });
         setInterval(() => {
             ws.send(JSON.stringify({ type: "ping", ts: Date.now() }))
-        }, 200)
+        }, 500)
 
     };
     try {
@@ -692,6 +698,7 @@ let messages = 0;
 ws.addEventListener("message", (datas) => {
     const msg = msgpack.decode(new Uint8Array(datas.data));
     messages++;
+    totalBytes+= datas.data.byteLength
     if (msg.type === "init") {
         if (msg.selfId) {
             selfId = msg.selfId;
@@ -748,8 +755,6 @@ ws.addEventListener("message", (datas) => {
         }
         if (selfId && players[selfId]) updateLeaderboard();
     } else if (msg.type === "update") {
-    	byteLength = datas.data.byteLength;
-    	byteSpan.innerText = `${byteLength} bytes`
         if (msg.highscore) {
             highscore = msg.highscore;
             highscoreSpan.innerText = `${highscore.name} : ${highscore.score}`
@@ -757,7 +762,7 @@ ws.addEventListener("message", (datas) => {
         if (msg.time) {
             roundTime = roundSeconds - (msg.time / 1000)
         }
-        if (selfId) {
+        if (selfId && msg.datas.player && msg.datas.player.length>0) {
             for (let data of msg.datas.player) {
                 const player = players[data.id];
                 if (player) {
@@ -812,7 +817,8 @@ ws.addEventListener("message", (datas) => {
             if (msg.datas.time) {
                 time = msg.datas.time.time / 1000;
             }
-            for (let data of msg.datas.arrow) {
+            if(msg.datas.arrow && msg.datas.arrow.length > 0){
+  	        for (let data of msg.datas.arrow) {
                 const arrow = arrows[data.id];
                 if (arrow) {
                     //const newState = {};
@@ -835,6 +841,7 @@ ws.addEventListener("message", (datas) => {
                     // arrow.states.push(newState);
                 }
             }
+        	}
         }
     } else if (msg.type === "remove") {
         for (let data of msg.datas.player) {
