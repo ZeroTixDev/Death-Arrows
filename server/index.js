@@ -13,7 +13,7 @@ const Arrow = require('./arrow');
 const Vector = require('./vector');
 /*const Database  = require("@replit/database")
 const db = new Database()*/
-app.use(express.static('client'));
+app.use(express.static('client/dist'));
 const clients = {};
 const players = {};
 const arrows = {};
