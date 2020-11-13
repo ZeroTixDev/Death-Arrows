@@ -1,3 +1,9 @@
+if (!window.location.origin.startsWith('https') && !window.location.origin.startsWith('http://localhost')) {
+	const a = document.createElement('a');
+	a.href = "https://death-arrows.herokuapp.com/"
+	a.click()
+	a.remove()
+}
 let ws = new WebSocket(location.origin.replace(/^http/, 'ws'));
 ws.binaryType = "arraybuffer";
 let players = Object.create(null);
