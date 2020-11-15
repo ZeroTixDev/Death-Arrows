@@ -23,11 +23,15 @@ let arena = new Vector(3000, 3000);
 const mapSizes = [2750, 2500, 2000, 2000, 3500]
 const platformSizes = [3, 2, 2, 2, 2,3]
 const mapTitles = ["Just fight", "Battlefield", "Open Arena", "Swirl", "Prison"]
+const classes = ["Attacker","Trickster","Escaper"]
+// Attacker -> Arrow cooldown 10% less, Homing arrow that uses arrow keys to steer -> 15 second cooldown
+// Trickster -> Moves 5% faster, Places down a clone that moves in the direction of arrow -> 20 second cooldown
+// Escaper -> Moves 10% faster, Invisible for 3 seconds -> 30 second cooldown
 const serverTick = 40;
 app.get("/", (_, res) => res.sendFile("client/index.html"));
 server.on('upgrade', (request, socket, head) => {
     wss.handleUpgrade(request, socket, head, socket => {
-        wss.emit('connection', socket, request);
+        wss.emit('connection', socket,  request);
     });
 });
 let lastTime = Date.now();
