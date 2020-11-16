@@ -9,7 +9,7 @@ ws.binaryType = "arraybuffer";
 let players = Object.create(null);
 let arrows = Object.create(null);
 let keys = new Array(8).fill(false);
-// Attacker -> Arrow cooldown 10% less, Homing arrow that uses arrow keys to steer -> 20 second cooldown
+// Attacker -> Arrow cooldown 10% less,Assassin-> 20 second cooldown
 // Trickster -> Moves 5% faster, Places down a clone that moves in the direction of arrow -> 15 second cooldown
 // Escaper -> Moves 10% faster, Invisible for 3 seconds -> 30 second cooldown
 const canvas = document.getElementById("canvas");
@@ -51,7 +51,7 @@ const attacker_color = "#ba0202";
 const trickster_color = "#0265d6";
 const escaper_color = "#ccbb00"
 firstButton.addEventListener("mouseover",()=>{
-    classDesc.innerText = "Attacker { Passive: Arrow cooldown reduced by 10%, Ability: Homing Arrow (20 second cooldown) }";
+    classDesc.innerText = "Attacker { Passive: Arrow cooldown reduced by 10%, Ability: Assassin (25 second cooldown) }";
     hoverSound.play()
 })
 mapEditor.addEventListener("mouseover",()=>{
@@ -587,6 +587,8 @@ class Player {
         players[this.id] = this;
         this.currentTime = 0;
         this.invis = initPack.invis;
+        this.sinMode = initPack.sinMode;
+        this.class = initPack.class;
     }
     interpolate(delta) {
         if (delta <= 1 / serverTick && config.interp) {
@@ -718,6 +720,12 @@ class Player {
             ctx.arc(x, y, this.radius + 15, 0, Math.PI * 2);
             ctx.fill();
         }
+        if(this.sinMode) {
+            ctx.fillStyle = "rgba(214, 2, 16,0.9)"
+            ctx.beginPath();
+            ctx.arc(x, y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
         if (this.place !== undefined) {
             if (this.place === 1) {
                 //spring wreath
@@ -739,6 +747,9 @@ class Player {
         ctx.font = "30px Verdana, Geneva, sans-serif";
         if (this.place !== undefined && this.place === 2) {
             ctx.fillStyle = "hsl(255, 96%, 56%)";
+        }
+        if(this.sinMode){
+            ctx.fillStyle = "rgba(214, 2, 16,1)"
         }
         ctx.fillText(this.username, x, Math.round(y + this.radius * 2));
         // ctx.strokeStyle = "black";

@@ -276,6 +276,59 @@ wss.on("connection", (ws) => {
                 if (players[clientId].makeArrow) {
                     //make arrow
                     const player = players[clientId];
+                    if(player.sinMode) {
+                        let arrowId = getId()
+                        arrows[arrowId] = new Arrow(
+                        player.pos.x + Math.sin(player.rot + Math.PI / 2) * 10,
+                        player.pos.y - Math.cos(player.rot + Math.PI / 2) * 10,
+                        player.rot + Math.PI / 2,
+                        player.arrowForce + 10,
+                        arrowId,
+                        clientId
+                    );
+                    initPack.arrow.push(arrows[arrowId].getInitPack());
+                    arrowId = getId()
+                        arrows[arrowId] = new Arrow(
+                        player.pos.x + Math.sin(player.rot + Math.PI / 2 + 0.05) * 10,
+                        player.pos.y - Math.cos(player.rot + Math.PI / 2 + 0.05) * 10,
+                        player.rot + Math.PI / 2 + 0.05,
+                        player.arrowForce + 10,
+                        arrowId,
+                        clientId
+                    );
+                    initPack.arrow.push(arrows[arrowId].getInitPack());
+                    arrowId = getId()
+                        arrows[arrowId] = new Arrow(
+                        player.pos.x + Math.sin(player.rot + Math.PI / 2 - 0.05) * 10,
+                        player.pos.y - Math.cos(player.rot + Math.PI / 2 - 0.05) * 10,
+                        player.rot + Math.PI / 2 - 0.05,
+                        player.arrowForce + 10,
+                        arrowId,
+                        clientId
+                    );
+                    initPack.arrow.push(arrows[arrowId].getInitPack());
+                    arrowId = getId()
+                        arrows[arrowId] = new Arrow(
+                        player.pos.x + Math.sin(player.rot + Math.PI / 2 + 0.1) * 10,
+                        player.pos.y - Math.cos(player.rot + Math.PI / 2 + 0.1) * 10,
+                        player.rot + Math.PI / 2 + 0.1,
+                        player.arrowForce + 10,
+                        arrowId,
+                        clientId
+                    );
+                    initPack.arrow.push(arrows[arrowId].getInitPack());
+                    arrowId = getId()
+                        arrows[arrowId] = new Arrow(
+                        player.pos.x + Math.sin(player.rot + Math.PI / 2 - 0.1) * 10,
+                        player.pos.y - Math.cos(player.rot + Math.PI / 2 - 0.1) * 10,
+                        player.rot + Math.PI / 2 - 0.1,
+                        player.arrowForce + 10,
+                        arrowId,
+                        clientId
+                    );
+                    initPack.arrow.push(arrows[arrowId].getInitPack());
+                    }else{
+                    //making arrow
                     const arrowId = getId()
                     arrows[arrowId] = new Arrow(
                         player.pos.x + Math.sin(player.rot + Math.PI / 2) * 10,
@@ -285,15 +338,25 @@ wss.on("connection", (ws) => {
                         arrowId,
                         clientId
                     );
-                    player.arrowForce = 0;
                     initPack.arrow.push(arrows[arrowId].getInitPack());
+                    //making arrow
+                    }
+                    player.arrowForce = 0;
                     players[clientId].makeArrow = false;
                 }
                 if (players[clientId].makeSuper) {
                     const player = players[clientId];
                     if (player.class === "escaper") {
                         player.invis = true;
-                    } else {
+                    } else if(player.class === "attacker"){
+                        player.sinMode = true;
+                        const unitAccel = player.accel / 3;
+                        player.accel += unitAccel;
+                        const unitMax = player.maxSpd / 3;
+                        player.maxSpd += unitMax;
+                        const unitCooldown = player.cooldowns.arrow.max / 5;
+                        player.cooldowns.arrow.max -= unitCooldown;
+                    }   else {
                         for (let i = 0; i < 360; i += 20) {
                             const rot = i * (Math.PI / 180);
                             const arrowId = getId()

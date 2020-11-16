@@ -68,7 +68,7 @@ module.exports = class Player {
     this.previous_kills = 0;
     this.cooldowns = {
       arrow: new Cooldown(1, 1.5),
-      super: new Cooldown(0, 30),
+      super: new Cooldown(0, 1),
       spawn: new Cooldown(3, 3)
     };
     this.arrowForce = 0;
@@ -93,6 +93,7 @@ module.exports = class Player {
     this.pendingRotate = [false, false];
     this.class = "attacker"
     this.invis = false;
+    this.sinMode = false;
     // up, down, left, right
     // Attacker -> Arrow cooldown 10% less, Homing arrow that uses arrow keys to steer -> 15 second cooldown
     // Trickster -> Moves 5% faster, Places down a clone that moves in the direction of arrow -> 20 second cooldown
@@ -102,9 +103,8 @@ module.exports = class Player {
     this.class = type;
     if(this.class === "attacker") {
       //console.log(this.class,this.cooldowns.arrow.max)
-      const unit = this.cooldowns.arrow.max / 10;
-      this.cooldowns.arrow.max -= unit;
-      this.cooldowns.super.max = 15;
+      this.cooldowns.arrow.max = 1.35;
+      this.cooldowns.super.max = 25;
       //console.log(this.cooldowns.arrow.max)
     } else if(this.class === "trickster") {
       //console.log(this.class,{accel:this.accel,max:this.maxSpd})
@@ -200,6 +200,9 @@ module.exports = class Player {
     if(this.class === "escaper") {
       object.invis = this.invis;
     }
+    if(this.class === "attacker") {
+      object.sinMode = this.sinMode;
+    }
     if(this.username_changed){
       this.username_changed = false;
       object.username = this.username;
@@ -271,6 +274,8 @@ module.exports = class Player {
       kills: this.kills,
       hitWall: this.hitWall,
       invis:this.invis,
+      sinMode:this.sinMode,
+      class:this.class,
     };
   }
   applyForce(force) {
@@ -299,9 +304,17 @@ module.exports = class Player {
     for (let i of Object.keys(this.cooldowns)) {
       this.cooldowns[i].update(delta);
     }
-    if(this.cooldowns.super.current <= this.cooldowns.super.max - 3) {
+    if(this.cooldowns.super.current <= this.cooldowns.super.max - 2) {
         if(this.class === "escaper" && this.invis){
             this.invis = false;
+        }
+    }
+    if(this.cooldowns.super.current <= this.cooldowns.super.max - 10) {
+        if(this.class === "attacker" && this.sinMode){
+            this.sinMode = false;
+            this.accel = 5000;
+            this.maxSpd = 375;
+            this.cooldowns.arrow.max = 1.35;
         }
     }
     if (!this.movementKeys[0] && !this.movementKeys[1]) {
