@@ -299,7 +299,7 @@ module.exports = class Player {
     for (let i of Object.keys(this.cooldowns)) {
       this.cooldowns[i].update(delta);
     }
-    if(this.cooldowns.super.current <= this.cooldowns.super.max - 2) {
+    if(this.cooldowns.super.current <= this.cooldowns.super.max - 3) {
         if(this.class === "escaper" && this.invis){
             this.invis = false;
         }

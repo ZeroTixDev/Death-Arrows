@@ -712,7 +712,7 @@ class Player {
         ctx.arc(x, y, this.radius, 0, Math.PI * 2);
         ctx.fill();
         //ctx.shadowBlur = 0;
-        if (this.cooldowns.spawn.current >= 0.001) {
+        if (this.cooldowns.spawn.current >= 0.5) {
             ctx.fillStyle = "rgba(118, 0, 222,0.4)";
             ctx.beginPath();
             ctx.arc(x, y, this.radius + 15, 0, Math.PI * 2);
@@ -959,7 +959,7 @@ ws.addEventListener("message", (datas) => {
             const arrow = arrows[id];
             if (arrow) {
                 if (type === "player" && config.particles) {
-                    for (let i = 0; i < 500; i++) {
+                    for (let i = 0; i < 80; i++) {
                         const colors = ['#E0E4CC', '#914000', '#ff1c1f', '#ff1c1f', '#ff1c1f', '#ff1c1f', '#ff1c1f', '#ff1c1f', '#ff1c1f', '#ff1c1f', '#ff1c1f', '#ff1c1f', '#ff1c1f', '#ff1c1f', '#ff1c1f', '#F9D423']
                         const color = colors[Math.floor(Math.random() * colors.length)]
                         particles.push(
@@ -970,10 +970,10 @@ ws.addEventListener("message", (datas) => {
                                 arrow.states[1] !== undefined ?
                                 arrow.states[1].y :
                                 arrow.states[0].y,
-                                Math.random() * 4 + 1,
+                                Math.random() * 3 + 1,
                                 color, {
-                                    x: (Math.random() - 0.5) * (Math.random() * 700),
-                                    y: (Math.random() - 0.5) * (Math.random() * 700)
+                                    x: (Math.random() - 0.5) * (Math.random() * 30),
+                                    y: (Math.random() - 0.5) * (Math.random() * 30)
                                 }
                             )
                         );
