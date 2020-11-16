@@ -35,11 +35,14 @@ class Cooldown {
   constructor(current, max) {
     this.current = current;
     this.max = max;
+    this.end = false;
   }
   update(delta) {
     this.current -= delta;
+    this.end = false;
     if (this.current <= 0) {
       this.current = 0;
+      this.end = true;
     }
   }
 }
@@ -65,7 +68,7 @@ module.exports = class Player {
     this.previous_kills = 0;
     this.cooldowns = {
       arrow: new Cooldown(1, 1.5),
-      super: new Cooldown(5, 30),
+      super: new Cooldown(0, 30),
       spawn: new Cooldown(3, 3)
     };
     this.arrowForce = 0;
@@ -88,7 +91,37 @@ module.exports = class Player {
     this.movementKeys = [false, false, false, false];
     this.hitWall = false;
     this.pendingRotate = [false, false];
+    this.class = "attacker"
+    this.invis = false;
     // up, down, left, right
+    // Attacker -> Arrow cooldown 10% less, Homing arrow that uses arrow keys to steer -> 15 second cooldown
+    // Trickster -> Moves 5% faster, Places down a clone that moves in the direction of arrow -> 20 second cooldown
+    // Escaper -> Moves 10% faster, Invisible for 3 seconds -> 30 second cooldown
+  }
+  applyClass(type){
+    this.class = type;
+    if(this.class === "attacker") {
+      //console.log(this.class,this.cooldowns.arrow.max)
+      const unit = this.cooldowns.arrow.max / 10;
+      this.cooldowns.arrow.max -= unit;
+      this.cooldowns.super.max = 15;
+      //console.log(this.cooldowns.arrow.max)
+    } else if(this.class === "trickster") {
+      //console.log(this.class,{accel:this.accel,max:this.maxSpd})
+      const unitAcc = this.accel / 20;
+      this.accel += unitAcc;
+      const unitMax = this.maxSpd / 20;
+      this.maxSpd += unitMax;
+      this.cooldowns.super.max = 20;
+      //console.log({accel:this.accel,max:this.maxSpd})
+    } else if(this.class === "escaper") {
+     // console.log(this.class,{accel:this.accel,max:this.maxSpd})
+      const unitAcc = this.accel / 10;
+      this.accel += unitAcc;
+      const unitMax = this.maxSpd / 10;
+      this.maxSpd += unitMax;
+      this.cooldowns.super.max = 30;
+    }
   }
   decodeKeys(keys) {
     this.makeArrow = false;
@@ -164,6 +197,9 @@ module.exports = class Player {
     if(this.cooldowns.spawn.current > 0 || this.cooldowns.super.current > 0 || this.cooldowns.arrow.current > 0) {
       object.cooldowns = this.cooldowns;
     }
+    if(this.class === "escaper") {
+      object.invis = this.invis;
+    }
     if(this.username_changed){
       this.username_changed = false;
       object.username = this.username;
@@ -233,7 +269,8 @@ module.exports = class Player {
       maxForce: this.maxForce,
       cooldowns: this.cooldowns,
       kills: this.kills,
-      hitWall: this.hitWall
+      hitWall: this.hitWall,
+      invis:this.invis,
     };
   }
   applyForce(force) {
@@ -261,6 +298,11 @@ module.exports = class Player {
       this.rot += Math.PI * 1.2 * delta;
     for (let i of Object.keys(this.cooldowns)) {
       this.cooldowns[i].update(delta);
+    }
+    if(this.cooldowns.super.current <= this.cooldowns.super.max - 3) {
+        if(this.class === "escaper" && this.invis){
+            this.invis = false;
+        }
     }
     if (!this.movementKeys[0] && !this.movementKeys[1]) {
       this.vel.y *= Math.pow(this.friction, delta * 15);

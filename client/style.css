@@ -417,20 +417,51 @@ h1 {
 
 .play {
     position: relative;
-    width: 180px;
-    height: 60px;
+    width:100px;
+    height:100px;
     color: white;
     text-decoration: none;
     text-transform: uppercase;
     text-align: center;
-    line-height: 60px;
+    /*line-height: 150px;*/
     letter-spacing: 2px;
-    filter: saturate(125%);
-    margin: 20px;
-    transition: all 0.5s linear;
+    filter: saturate(50%);
+    margin-left: 30px;
+    border-radius:50%;
+    margin-right: 30px;
+    transition: filter 0.2s linear;
     background: rgb(23, 23, 148);
+    outline:none;
+    animation:moveIn 1s linear;
 }
-
+#red{
+    background:#b51f1f;
+}
+#blue{
+    background: #1b63b5;
+}
+#yellow{
+    background: #ab9f1b;
+}
+.classes{
+    padding:5px;
+    position: relative;
+    top:30px;
+    display:flex;
+    justify-content:center;
+    align-content:center;
+  /*  flex-direction:column;*/
+    min-height:150px;
+    transition:all 0.2s linear;
+}
+@keyframes moveIn{
+    0%{
+        top:-50vh;
+    }
+    100%{
+        top:0px;
+    }
+}
 @keyframes fadeIn {
     0% {
         opacity: 0;
@@ -492,17 +523,17 @@ p {
 }
 
 .play:hover {
-    background: #18125bfe url(./graphics/pixel.png);
+    /*background: #18125bfe url(./graphics/pixel.png);
     transition-delay: 0.8s;
-    background-size: 180px;
-    filter: saturate(125%);
-    animation: animate 0.8s steps(8) forwards;
+    background-size: 180px;*/
+    filter: saturate(200%);
+    /*animation: animate 0.8s steps(8) forwards;*/
 }
 
 .play::after:hover {
-    background: #241c7b6d;
+   /* background: #241c7b6d;
     filter: saturate(125%);
-    z-index: 200;
+    z-index: 200;*/
 }
 
 @keyframes animate {

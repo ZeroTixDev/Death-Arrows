@@ -10,8 +10,6 @@ const Platform = require("./platform");
 const Player = require("./player");
 const Arrow = require("./arrow");
 const Vector = require("./vector");
-/*const Database  = require("@replit/database")
-const db = new Database()*/
 app.use(express.static("client"));
 const clients = {};
 const players = {};
@@ -21,17 +19,17 @@ const initPack = { player: [], arrow: [] };
 const removePack = { player: [], arrow: [] };
 let arena = new Vector(3000, 3000);
 const mapSizes = [2750, 2500, 2000, 2000, 3500]
-const platformSizes = [3, 2, 2, 2, 2,3]
+const platformSizes = [3, 2, 2, 2, 2, 3]
 const mapTitles = ["Just fight", "Battlefield", "Open Arena", "Swirl", "Prison"]
-const classes = ["Attacker","Trickster","Escaper"]
-// Attacker -> Arrow cooldown 10% less, Homing arrow that uses arrow keys to steer -> 15 second cooldown
-// Trickster -> Moves 5% faster, Places down a clone that moves in the direction of arrow -> 20 second cooldown
+const classes = ["Attacker", "Trickster", "Escaper"]
+// Attacker -> Arrow cooldown 10% less, Homing arrow that uses arrow keys to steer -> 20 second cooldown
+// Trickster -> Moves 5% faster, Places down a clone that moves in the direction of arrow -> 15 second cooldown
 // Escaper -> Moves 10% faster, Invisible for 3 seconds -> 30 second cooldown
 const serverTick = 40;
 app.get("/", (_, res) => res.sendFile("client/index.html"));
 server.on('upgrade', (request, socket, head) => {
     wss.handleUpgrade(request, socket, head, socket => {
-        wss.emit('connection', socket,  request);
+        wss.emit('connection', socket, request);
     });
 });
 let lastTime = Date.now();
@@ -193,8 +191,8 @@ function updateGameState(clients, players) {
             if (old_highscore.score != highscore.score) {
                 updateObject.highscore = highscore;
             }
-            if(Math.round(old_roundTime)!=Math.round(roundTime)){
-              updateObject.time = Math.round(roundTime * 1000)
+            if (Math.round(old_roundTime) != Math.round(roundTime)) {
+                updateObject.time = Math.round(roundTime * 1000)
             }
             clientSocket.send(
                 msgpack.encode(updateObject)
@@ -243,6 +241,7 @@ wss.on("connection", (ws) => {
                     const spawn = randomSpawnPos();
                     players[clientId].pos.x = spawn.x;
                     players[clientId].pos.y = spawn.y;
+                    players[clientId].applyClass(data.class);
                     initPack.player.push(players[clientId].getInitPack());
                     ws.send(
                         msgpack.encode({
@@ -259,7 +258,7 @@ wss.on("connection", (ws) => {
                             platformSize: platformSizes[number - 1],
                             arena,
                             serverTick,
-                            roundTime:roundTimeMax,
+                            roundTime: roundTimeMax,
                         })
                     );
                     joined = true;
@@ -292,19 +291,23 @@ wss.on("connection", (ws) => {
                 }
                 if (players[clientId].makeSuper) {
                     const player = players[clientId];
-                    for (let i = 0; i < 360; i += 20) {
-                        const rot = i * (Math.PI / 180);
-                        const arrowId = getId()
-                        arrows[arrowId] = new Arrow(
-                            player.pos.x + Math.sin(rot + Math.PI / 2) * 10,
-                            player.pos.y - Math.cos(rot + Math.PI / 2) * 10,
-                            rot + Math.PI / 2,
-                            30,
-                            arrowId,
-                            clientId,
-                            true
-                        );
-                        initPack.arrow.push(arrows[arrowId].getInitPack());
+                    if (player.class === "escaper") {
+                        player.invis = true;
+                    } else {
+                        for (let i = 0; i < 360; i += 20) {
+                            const rot = i * (Math.PI / 180);
+                            const arrowId = getId()
+                            arrows[arrowId] = new Arrow(
+                                player.pos.x + Math.sin(rot + Math.PI / 2) * 10,
+                                player.pos.y - Math.cos(rot + Math.PI / 2) * 10,
+                                rot + Math.PI / 2,
+                                30,
+                                arrowId,
+                                clientId,
+                                true
+                            );
+                            initPack.arrow.push(arrows[arrowId].getInitPack());
+                        }
                     }
                     players[clientId].makeSuper = false;
                 }
@@ -352,31 +355,31 @@ wss.on("connection", (ws) => {
                 } else if (players[clientId].dev && data.value.slice(0, 6).toLowerCase() === "/reset") {
                     roundTime = roundTimeMax;
                     roundTime += 1;
-                }  else if (players[clientId].dev && data.value.slice(0, 6).toLowerCase() === "/blind") {
-                    const username = data.value.slice(7,data.value.length);
+                } else if (players[clientId].dev && data.value.slice(0, 6).toLowerCase() === "/blind") {
+                    const username = data.value.slice(7, data.value.length);
                     console.log(username)
-                    for(let i of Object.keys(players)){
-                      if(players[i].username === username) {
-                        if(clients[i]){
-                          clients[i].send(msgpack.encode({type:"blind"}))
+                    for (let i of Object.keys(players)) {
+                        if (players[i].username === username) {
+                            if (clients[i]) {
+                                clients[i].send(msgpack.encode({ type: "blind" }))
+                            }
+                            break;
                         }
-                        break;
-                      }
                     }
-                } else if(players[clientId].dev && data.value.slice(0,5).toLowerCase() === "/sudo"){
+                } else if (players[clientId].dev && data.value.slice(0, 5).toLowerCase() === "/sudo") {
                     const array = data.value.split(' ')
                     const name = array[1]
                     let message = array.slice(2).join(' ')
                     console.log(message)
-                    for(let i of Object.keys(players)){
-                      if(players[i].username === name){
-                        players[i].chatMsg = message;
-                        players[i].chatTime = 5;
-                        console.log(array)
-                        break;
-                      }
+                    for (let i of Object.keys(players)) {
+                        if (players[i].username === name) {
+                            players[i].chatMsg = message;
+                            players[i].chatTime = 5;
+                            console.log(array)
+                            break;
+                        }
                     }
-                }else if (players[clientId].dev && data.value.slice(0, 4).toLowerCase() === "/map") {
+                } else if (players[clientId].dev && data.value.slice(0, 4).toLowerCase() === "/map") {
                     const num = Number(data.value.slice(5))
                     number = num;
                     if (num && num >= 1 && num <= mapSizes.length) {
@@ -444,12 +447,12 @@ wss.on("connection", (ws) => {
                           }
                         }*/
                 else {
-                  if(data.value == key){
-                    players[clientId].dev = true;
-                  }else{
-                    players[clientId].chatMsg = data.value;
-                    players[clientId].chatTime = 5;
-                  }
+                    if (data.value == key) {
+                        players[clientId].dev = true;
+                    } else {
+                        players[clientId].chatMsg = data.value;
+                        players[clientId].chatTime = 5;
+                    }
                 }
             } else if (data.type === "back") {
                 delete clients[clientId];

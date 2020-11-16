@@ -27,10 +27,21 @@
     />
   </head>
   <body>
+  <audio id="hover">
+    <source src="./sounds/classicButtonHover.wav" type="audio/wav">
+  </audio>
+  <audio id="click">
+    <source src="./sounds/click.wav" type="audio/wav">
+  </audio>
     <div class="menu">
       <!----<input type="text" class="username" placeholder="Username" /> --->
       <h1>Death Arrows<span class="version">.alpha</span></h1>
-      <a tabindex=1 href="#" class="play">Play</a>
+      <div class="classes">
+        <a tabindex=1 href="#" class="play" id="red"></a>
+        <a tabindex=2 href="#" class="play" id="blue"></a>
+        <a tabindex=3 href="#" class="play" id="yellow"></a></div>
+        <p class="class-desc"></p>
+      <!--<a tabindex=1 href="#" class="play">Play</a> -->
       <div class="container" id="menuContainer">
         <a
           href=" https://mini-project-11-map-editor.zerotixdev.repl.co/"

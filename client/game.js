@@ -9,14 +9,24 @@ ws.binaryType = "arraybuffer";
 let players = Object.create(null);
 let arrows = Object.create(null);
 let keys = new Array(8).fill(false);
+// Attacker -> Arrow cooldown 10% less, Homing arrow that uses arrow keys to steer -> 20 second cooldown
+// Trickster -> Moves 5% faster, Places down a clone that moves in the direction of arrow -> 15 second cooldown
+// Escaper -> Moves 10% faster, Invisible for 3 seconds -> 30 second cooldown
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+const firstButton = document.getElementById("red");
+const hoverSound = document.querySelector("#hover");
+const clickSound = document.querySelector("#click")
+const secondButton = document.getElementById("blue");
+const thirdButton = document.getElementById("yellow");
+const classDesc = document.querySelector(".class-desc");
 const chatBox = document.getElementById("chatBox");
 const chatHolder = document.getElementById("chatHolder");
 const mainDiv = document.querySelector("#gameContainer");
 const menuDiv = document.querySelector("#menuContainer");
 const menuGame = document.querySelector(".container nav");
 const backButton = document.querySelector(".back");
+const mapEditor = document.querySelector(".links")
 const nameSpan = document.querySelector(".name");
 const byteSpan = document.querySelector(".container .byte")
 const pingSpan = document.querySelector(".container .ping");
@@ -36,6 +46,41 @@ let platformMiniSize = 3;
 let ping = 10000;
 const detectPadding = 150;
 let blind = false;
+let messages = 0;
+const attacker_color = "#ba0202";
+const trickster_color = "#0265d6";
+const escaper_color = "#ccbb00"
+firstButton.addEventListener("mouseover",()=>{
+    classDesc.innerText = "Attacker { Passive: Arrow cooldown reduced by 10%, Ability: Homing Arrow (20 second cooldown) }";
+    hoverSound.play()
+})
+mapEditor.addEventListener("mouseover",()=>{
+    hoverSound.play()
+})
+
+secondButton.addEventListener("mouseover",()=>{
+    classDesc.innerText = "Trickster { Passive: Moves 5% faster, Ability: Clone (15 second cooldown) }";
+    hoverSound.play()
+})
+thirdButton.addEventListener("mouseover",()=>{
+    classDesc.innerText = "Escaper { Passive: Moves 10% faster, Ability: Invisibility (30 second cooldown) }";
+    hoverSound.play()
+})
+firstButton.addEventListener("mouseup",()=>{
+    switchMenu("attacker")
+    playerCircle.style.backgroundColor = attacker_color;
+    clickSound.play()
+});
+secondButton.addEventListener("mouseup",()=>{
+    switchMenu("trickster")
+    playerCircle.style.backgroundColor = trickster_color;
+    clickSound.play()
+});
+thirdButton.addEventListener("mouseup",()=>{
+    switchMenu("escaper")
+    playerCircle.style.backgroundColor = escaper_color
+    clickSound.play()
+});
 const meter = new FPSMeter(mainDiv, {
     theme: "colorful",
     heat: 1,
@@ -109,7 +154,6 @@ let time = 0;
 let index;
 const menu = document.querySelector(".menu");
 const game = document.querySelector(".game");
-const play = document.querySelector("a");
 let platforms = [];
 let rotLeft = false;
 let rotRight = false;
@@ -125,7 +169,11 @@ saveButton.addEventListener("mouseup", (event) => {
     localStorage.setItem("config", JSON.stringify(config));
     overlay.style.display = "none";
     notMove = false;
+    clickSound.play()
 });
+saveButton.addEventListener("mouseover",()=>{
+    hoverSound.play()
+})
 interpolateButton.addEventListener("mouseup", (event) => {
     event.preventDefault();
     config.interp = !config.interp;
@@ -136,7 +184,11 @@ interpolateButton.addEventListener("mouseup", (event) => {
         interpolateButton.classList.remove("yes");
         interpolateButton.classList.add("no");
     }
+    clickSound.play()
 });
+interpolateButton.addEventListener("mouseover",()=>{
+    hoverSound.play()
+})
 fpsButton.addEventListener("mouseup", (event) => {
 	event.preventDefault()
 	config.fps = !config.fps;
@@ -149,6 +201,10 @@ fpsButton.addEventListener("mouseup", (event) => {
 		fpsButton.classList.add("no");
    	    meterElement.style.display = "none";
 	}
+    clickSound.play()
+})
+fpsButton.addEventListener("mouseover",()=>{
+    hoverSound.play()
 })
 particleButton.addEventListener("mouseup", (event) => {
     event.preventDefault();
@@ -160,22 +216,38 @@ particleButton.addEventListener("mouseup", (event) => {
         particleButton.classList.remove("yes");
         particleButton.classList.add("no");
     }
+    clickSound.play()
 });
+particleButton.addEventListener("mouseover",()=>{
+    hoverSound.play()
+})
 settings.addEventListener("mouseup", (event) => {
     event.preventDefault();
     overlay.style.display = "flex";
     notMove = true;
+    clickSound.play()
 });
+settings.addEventListener("mouseover",()=>{
+    hoverSound.play()
+})
 helpButton.addEventListener("mouseup", (event) => {
     event.preventDefault()
     helpOverlay.style.display = "flex"
     helpOverlay.scrollTop = 0;
     notMove = true;
+    clickSound.play()
+})
+helpButton.addEventListener("mouseover",()=>{
+    hoverSound.play()
 })
 leaveHelp.addEventListener("mouseup", (event) => {
     event.preventDefault()
     helpOverlay.style.display = "none"
     notMove = false;
+    clickSound.play()
+})
+leaveHelp.addEventListener("mouseover",()=>{
+    hoverSound.play()
 })
 helpOverlay.addEventListener("submit", (event) => event.preventDefault())
 overlay.addEventListener("submit", (event) => event.preventDefault())
@@ -188,8 +260,9 @@ backButton.addEventListener("mouseup", (event) => {
     if (ws) ws.send(JSON.stringify(payload));
     menu.style.display = "flex";
     game.style.display = "none";
+    clickSound.play()
 });
-
+backButton.addEventListener("mouseover",()=>{hoverSound.play()})
 function showMenu(event) {
     const y = Math.round(event.pageY);
     if (y <= 60) {
@@ -203,19 +276,20 @@ function showMenu(event) {
     }
 }
 window.addEventListener("beforeunload", () => {
-    config.name = (username) ? username : config.username;
+    config.name = (players[selfId] && players[selfId].username) ? players[selfId].username : config.username;
     localStorage.setItem("config", JSON.stringify(config))
 })
 //window.addEventListener("mousemove", showMenu);
 let afr;
-let username;
+//let username;
 
-function switchMenu() {
+function switchMenu(type) {
     menu.style.display = "none";
     game.style.display = "block";
     const init = () => {
         const payload = {
-            type: "join"
+            type: "join",
+            class:type,
         };
         if (ws) ws.send(JSON.stringify(payload));
         if (config.name !== "" && ws) ws.send(JSON.stringify({ type: "chat", value: "/name " + config.name, }))
@@ -283,7 +357,6 @@ function updateLeaderboard() {
         });
     }
 }
-play.addEventListener("mouseup", switchMenu);
 ctx.textAlign = "center";
 ctx.font = "20px Verdana, Geneva, sans-serif";
 let chatlock = false;
@@ -408,8 +481,6 @@ class Platform {
         ctx.strokeStyle = "#212752";*/
         /*ctx.fillStyle = "#455453";
         ctx.strokeStyle = "#455453";*/
-        ctx.fillStyle = platformColor;
-        ctx.strokeStyle = platformColor;
         ctx.fillRect(x, y, this.width, this.height);
         ctx.strokeRect(x, y, this.width, this.height);
     }
@@ -513,6 +584,7 @@ class Player {
         this.color = undefined;
         players[this.id] = this;
         this.currentTime = 0;
+        this.invis = initPack.invis;
     }
     interpolate(delta) {
         if (delta <= 1 / serverTick && config.interp) {
@@ -553,6 +625,7 @@ class Player {
         if(x+this.radius < -detectPadding || x -this.radius> canvas.width + detectPadding|| y -this.radius> canvas.height + detectPadding || y + this.radius < -detectPadding) {
         	return;
         }
+        if(this.invis) return;
         playerDraw++;
         ctx.fillStyle = "#a8a8a8";
         ctx.beginPath();
@@ -574,7 +647,7 @@ class Player {
             } else if (this.place === 3) {
                 ctx.fillStyle = "hsl(0, 100%, 40%)";
             }
-            if (this.id === selfId) {
+            /*if (this.id === selfId) {
                 if (this.place === 1) {
                     playerCircle.style.backgroundColor = "hsl(45, 88%, 50%)";
                 } else if (this.place === 2) {
@@ -582,7 +655,7 @@ class Player {
                 } else if (this.place === 3) {
                     playerCircle.style.backgroundColor = "hsl(0, 100%, 40%)";
                 }
-            }
+            }*/
         }
 
         this.color = ctx.fillStyle;
@@ -716,7 +789,6 @@ function resize() {
 resize();
 window.addEventListener("resize", resize);
 afr = window.requestAnimationFrame(render);
-let messages = 0;
 ws.addEventListener("message", (datas) => {
     const msg = msgpack.decode(new Uint8Array(datas.data));
     messages++;
@@ -1040,6 +1112,7 @@ let initial = 0;
 let currentTime = 0;
 let lastHighscoreString = ""
 let arrowDraw = 0;
+let blindAlpha = 0.5;
 function render(time) {
     afr = window.requestAnimationFrame(render);
     if(config.fps) meter.tickStart()
@@ -1059,7 +1132,7 @@ function render(time) {
         initial = 1;
         gameStart = true;
     }
-    username = players[selfId].username
+    //username = players[selfId].username
     if (nameSpan.innerText !== players[selfId].username)
         nameSpan.innerText = players[selfId].username;
     const delta = (time - lastTime) / 1000;
@@ -1104,14 +1177,16 @@ function render(time) {
       star.draw(delta);
     }*/
     platformsDraw = 0;
+    ctx.fillStyle = platformColor;
+    ctx.strokeStyle = platformColor;
     for (let platform of platforms) {
         platform.draw();
     }
    // console.log(`${platformsDraw} platforms on screen, ${platforms.length} total platforms`	)
     particleDraw = 0;
     if(blind) {
-    	ctx.save();
-        ctx.globalAlpha = 0.05;
+    	//ctx.save();
+        ctx.globalAlpha = blindAlpha;
     }
     for (let i = particles.length - 1; i >= 0; i--) {
         const particle = particles[i];
@@ -1125,8 +1200,8 @@ function render(time) {
      //console.log(`${particleDraw} particles on screen, total particles ${particles.length}`)
     ctx.fillStyle = "rgba(39, 55, 73, 0.8)";
     ctx.fillRect(0, 696, 206, 206);
+    ctx.fillStyle = platformColor;
     for (let platform of platforms) {
-        ctx.fillStyle = platformColor;
         ctx.beginPath();
         ctx.arc(
             Math.round(platformMiniSize + ((platform.x + platform.width / 2) / arena.x) * 200),
@@ -1258,7 +1333,7 @@ function render(time) {
     ctx.fill()
     ctx.stroke()
     ctx.closePath()
-    	ctx.fillStyle = "black"
+    ctx.fillStyle = "black"
     ctx.fillText(convert(roundTime), canvas.width / 2, 30)
    // ctx.fillText(`${byteLength} bytes`, canvas.width - 100, canvas.height - 30)
    if(config.fps) meter.tick()
