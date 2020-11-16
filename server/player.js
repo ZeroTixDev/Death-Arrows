@@ -117,9 +117,9 @@ module.exports = class Player {
     } else if(this.class === "escaper") {
      // console.log(this.class,{accel:this.accel,max:this.maxSpd})
       const unitAcc = this.accel / 10;
-      this.accel += unitAcc;
+      this.accel = 5500;
       const unitMax = this.maxSpd / 10;
-      this.maxSpd += unitMax;
+      this.maxSpd = 412.5
       this.cooldowns.super.max = 20;
     }
   }
@@ -307,6 +307,8 @@ module.exports = class Player {
     if(this.cooldowns.super.current <= this.cooldowns.super.max - 2) {
         if(this.class === "escaper" && this.invis){
             this.invis = false;
+            this.accel = 5500;
+            this.maxSpd = 412.5
         }
     }
     if(this.cooldowns.super.current <= this.cooldowns.super.max - 10) {

@@ -348,6 +348,10 @@ wss.on("connection", (ws) => {
                     const player = players[clientId];
                     if (player.class === "escaper") {
                         player.invis = true;
+                        const unitAccel = player.accel / 10;
+                        player.accel += unitAccel;
+                        const unitMax = player.maxSpd / 10;
+                        player.maxSpd += unitMax;
                     } else if(player.class === "attacker"){
                         player.sinMode = true;
                         const unitAccel = player.accel / 3;
