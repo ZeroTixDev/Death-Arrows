@@ -120,7 +120,7 @@ module.exports = class Player {
       this.accel += unitAcc;
       const unitMax = this.maxSpd / 10;
       this.maxSpd += unitMax;
-      this.cooldowns.super.max = 30;
+      this.cooldowns.super.max = 20;
     }
   }
   decodeKeys(keys) {
@@ -299,7 +299,7 @@ module.exports = class Player {
     for (let i of Object.keys(this.cooldowns)) {
       this.cooldowns[i].update(delta);
     }
-    if(this.cooldowns.super.current <= this.cooldowns.super.max - 3) {
+    if(this.cooldowns.super.current <= this.cooldowns.super.max - 2) {
         if(this.class === "escaper" && this.invis){
             this.invis = false;
         }

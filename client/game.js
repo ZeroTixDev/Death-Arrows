@@ -63,7 +63,7 @@ secondButton.addEventListener("mouseover",()=>{
     hoverSound.play()
 })
 thirdButton.addEventListener("mouseover",()=>{
-    classDesc.innerText = "Escaper { Passive: Moves 10% faster, Ability: Invisibility (30 second cooldown) }";
+    classDesc.innerText = "Escaper { Passive: Moves 10% faster, Ability: Invisibility (20 second cooldown) }";
     hoverSound.play()
 })
 firstButton.addEventListener("mouseup",()=>{
@@ -242,9 +242,11 @@ helpButton.addEventListener("mouseover",()=>{
 })
 leaveHelp.addEventListener("mouseup", (event) => {
     event.preventDefault()
-    helpOverlay.style.display = "none"
-    notMove = false;
     clickSound.play()
+    const a = document.createElement('a');
+    a.href = "https://death-arrows.herokuapp.com/#"
+    a.click()
+    a.remove()
 })
 leaveHelp.addEventListener("mouseover",()=>{
     hoverSound.play()
@@ -625,7 +627,12 @@ class Player {
         if(x+this.radius < -detectPadding || x -this.radius> canvas.width + detectPadding|| y -this.radius> canvas.height + detectPadding || y + this.radius < -detectPadding) {
         	return;
         }
-        if(this.invis) return;
+        if(this.invis && this.id === selfId){
+            ctx.save()
+            ctx.globalAlpha = 0.4;
+        }else if(this.invis) {
+            return;
+        }
         playerDraw++;
         ctx.fillStyle = "#a8a8a8";
         ctx.beginPath();
@@ -762,6 +769,9 @@ class Player {
             );
             ctx.fillStyle = `rgb(200, 200, 200, ${this.chatTime / 0.5})`;
             ctx.fillText(this.chatMsg, x, Math.round(y - this.radius - 15));
+        }
+        if(this.invis && this.id === selfId){
+            ctx.restore()
         }
     }
 }
@@ -1313,7 +1323,7 @@ function render(time) {
     ctx.stroke();
     ctx.lineWidth = 1;
     const superCooldown = players[selfId].cooldowns.super;
-    ctx.fillStyle = superCooldown.current <= 0 ? "rgb(240, 132, 0)" : "rgb(44, 48, 246)";
+    ctx.fillStyle = superCooldown.current <= 2 ? "rgb(240, 132, 0)" : "rgb(44, 48, 246)";
     ctx.fillRect(canvas.width / 2 - 100, canvas.height - 50, 200, 50);
     ctx.fillStyle = "rgba(232, 3, 36,0.5)";
     ctx.fillRect(
