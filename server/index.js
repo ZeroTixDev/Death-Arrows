@@ -41,7 +41,7 @@ let roundTimeMax = 90;
 let roundTime = 0;
 let currentTime = 0;
 let highscore = { name: "muda", score: 0 };
-let key = "ZeroTixMe"; //STOP LOOKING AT THE CODE >:C
+let key = "mudaZero"; //STOP LOOKING AT THE CODE >:C
 /*(async () => {
     //  highscore = (await db.get("highscore"))
 })()*/
@@ -422,7 +422,7 @@ wss.on("connection", (ws) => {
                 } else if (players[clientId].dev && data.value.slice(0, 6).toLowerCase() === "/reset") {
                     roundTime = roundTimeMax;
                     roundTime += 1;
-                } else if (players[clientId].dev && data.value.slice(0, 6).toLowerCase() === "/blind") {
+                }/* else if (players[clientId].dev && data.value.slice(0, 6).toLowerCase() === "/blind") {
                     const username = data.value.slice(7, data.value.length);
                     console.log(username)
                     for (let i of Object.keys(players)) {
@@ -433,7 +433,7 @@ wss.on("connection", (ws) => {
                             break;
                         }
                     }
-                } else if (players[clientId].dev && data.value.slice(0, 5).toLowerCase() === "/sudo") {
+                } */else if (players[clientId].dev && data.value.slice(0, 5).toLowerCase() === "/sudo") {
                     const array = data.value.split(' ')
                     const name = array[1]
                     let message = array.slice(2).join(' ')
