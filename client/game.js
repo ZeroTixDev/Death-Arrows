@@ -159,7 +159,7 @@ let rotLeft = false;
 let rotRight = false;
 let totalBytes = 0;
 setInterval(()=>{
-   	byteSpan.innerText = `Messages received: ${messages} / per second : ${totalBytes} bytes / per second`
+   	byteSpan.innerText = `Messages received: ${messages} / per second : ${totalBytes/1000} kbps`
 	totalBytes = 0;
 	messages = 0;
 },1000)

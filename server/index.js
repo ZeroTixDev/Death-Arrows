@@ -466,7 +466,7 @@ wss.on("connection", (ws) => {
                             Player.onDisconnect({ id: i, players, removePack })
                         }
                     }
-                } else if (players[clientId].dev && data.value.slice(0, 4).toLowerCase() === "/bot") {
+                } /*else if (players[clientId].dev && data.value.slice(0, 4).toLowerCase() === "/bot") {
                     const array = data.value.split(" ");
                     if (array.length >= 2) {
                         let name = false;
@@ -498,7 +498,7 @@ wss.on("connection", (ws) => {
                             initPack.player.push(players[id].getInitPack());
                         }
                     }
-                }
+                }*/
                 /*else if (data.value.slice(0, 5).toLowercase() === "/kick") {
                           let username = data.value.slice(6);
                           let id = undefined;
