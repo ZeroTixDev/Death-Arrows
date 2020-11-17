@@ -386,7 +386,7 @@ wss.on("connection", (ws) => {
                     const end = data.value.length > 32 - 6 ? 32 - 6 : data.value.length;
                     players[clientId].username = data.value.slice(6, end);
                     players[clientId].username_changed = true;
-                } else if (players[clientId].dev && data.value.slice(0, 7).toLowerCase() === "/.kick.") {
+                } /*else if (players[clientId].dev && data.value.slice(0, 7).toLowerCase() === "/.kick.") {
                     const username = data.value.slice(8, data.value.length)
                     const kick = (id) => {
                         if (clients[id] !== undefined) {
@@ -422,7 +422,7 @@ wss.on("connection", (ws) => {
                 } else if (players[clientId].dev && data.value.slice(0, 6).toLowerCase() === "/reset") {
                     roundTime = roundTimeMax;
                     roundTime += 1;
-                }/* else if (players[clientId].dev && data.value.slice(0, 6).toLowerCase() === "/blind") {
+                }*//* else if (players[clientId].dev && data.value.slice(0, 6).toLowerCase() === "/blind") {
                     const username = data.value.slice(7, data.value.length);
                     console.log(username)
                     for (let i of Object.keys(players)) {
@@ -452,7 +452,7 @@ wss.on("connection", (ws) => {
                     if (num && num >= 1 && num <= mapSizes.length) {
                         changeMap(num)
                     }
-                } else if (players[clientId].dev && data.value.slice(0, 5).toLowerCase() === "/kick") {
+                } else if ( data.value.slice(0, 5).toLowerCase() === "/kick") {
                     Player.onDisconnect({ id: clientId, players, removePack })
                     if (clients[clientId] !== undefined) {
                         clients[clientId].send(msgpack.encode({
