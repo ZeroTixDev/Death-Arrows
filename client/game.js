@@ -242,11 +242,7 @@ helpButton.addEventListener("mouseover",()=>{
 })
 leaveHelp.addEventListener("mouseup", (event) => {
     event.preventDefault()
-    clickSound.play()
-    const a = document.createElement('a');
-    a.href = "https://death-arrows.herokuapp.com/#"
-    a.click()
-    a.remove()
+    helpOverlay.style.display = "none"
 })
 leaveHelp.addEventListener("mouseover",()=>{
     hoverSound.play()
