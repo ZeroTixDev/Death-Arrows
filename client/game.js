@@ -51,7 +51,7 @@ const attacker_color = "#ba0202";
 const trickster_color = "#0265d6";
 const escaper_color = "#ccbb00"
 firstButton.addEventListener("mouseover",()=>{
-    classDesc.innerText = "Attacker { Passive: Arrow cooldown reduced by 10%, Ability: Assassin (25 second cooldown) }";
+    classDesc.innerText = "Attacker { Passive: Arrow cooldown reduced by 10%, Ability: Sin Mode (25 second cooldown) }";
     hoverSound.play()
 })
 mapEditor.addEventListener("mouseover",()=>{

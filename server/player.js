@@ -94,6 +94,8 @@ module.exports = class Player {
     this.class = "attacker"
     this.invis = false;
     this.sinMode = false;
+    this.invisLength = 3;
+    this.sinLength = 10;
     // up, down, left, right
     // Attacker -> Arrow cooldown 10% less, Homing arrow that uses arrow keys to steer -> 15 second cooldown
     // Trickster -> Moves 5% faster, Places down a clone that moves in the direction of arrow -> 20 second cooldown
@@ -304,14 +306,14 @@ module.exports = class Player {
     for (let i of Object.keys(this.cooldowns)) {
       this.cooldowns[i].update(delta);
     }
-    if(this.cooldowns.super.current <= this.cooldowns.super.max - 2) {
+    if(this.cooldowns.super.current <= this.cooldowns.super.max - this.invisLength) {
         if(this.class === "escaper" && this.invis){
             this.invis = false;
             this.accel = 5500;
             this.maxSpd = 412.5
         }
     }
-    if(this.cooldowns.super.current <= this.cooldowns.super.max - 10) {
+    if(this.cooldowns.super.current <= this.cooldowns.super.max - this.sinLength) {
         if(this.class === "attacker" && this.sinMode){
             this.sinMode = false;
             this.accel = 5000;
