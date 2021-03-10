@@ -18,9 +18,9 @@ let platforms = [];
 const initPack = { player: [], arrow: [] };
 const removePack = { player: [], arrow: [] };
 let arena = new Vector(3000, 3000);
-const mapSizes = [2250, 2500, 2000, 2000, 2500]
+const mapSizes = [3000, 2500, 2000, 2000, 2500, 3000]
 const platformSizes = [3, 2, 2, 2, 2, 3]
-const mapTitles = ["Just fight", "Battlefield", "Open Arena", "Swirl", "Prison"]
+const mapTitles = ["Just fight", "Battlefield", "Open Arena", "Swirl", "Prison", "Ott's Map"]
 const classes = ["Attacker", "Trickster", "Escaper"]
 // Attacker -> Arrow cooldown 10% less, Homing arrow that uses arrow keys to steer -> 20 second cooldown
 // Trickster -> Moves 5% faster, Places down a clone that moves in the direction of arrow -> 15 second cooldown
